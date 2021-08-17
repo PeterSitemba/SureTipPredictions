@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                 Log.e(localClassName, it)
             })
 
-            //predictionsViewModel.getAllMatchEvents()
+            predictionsViewModel.getAllMatchEvents()
 
 
         }
