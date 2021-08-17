@@ -12,7 +12,9 @@ class PredictionsRepository @Inject constructor(
     private val predictionsDao: PredictionsDao
 ) {
 
-    val roomMatchEventsList: Flow<MatchEvents> = predictionsDao.getAllMatchEvents()
+    val roomMatchEventsList: Flow<List<MatchEvents>> = predictionsDao.getAllMatchEvents()
+
+    //val roomMatchEventsListByDate: Flow<List<MatchEvents>> = predictionsDao.getAllMatchEventsByDate(setMatchDate())
 
 
     suspend fun getAllMatchEvents() = retrofitService.getMatchEventsForDateRange()
@@ -21,6 +23,10 @@ class PredictionsRepository @Inject constructor(
     @WorkerThread
     suspend fun insert(matchEvents: MatchEvents) {
         predictionsDao.insert(matchEvents)
+    }
+
+    fun roomMatchEventsListByDate(match_date : String) : Flow<List<MatchEvents>>{
+        return predictionsDao.getAllMatchEventsByDate(match_date)
     }
 
 }

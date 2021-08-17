@@ -8,27 +8,11 @@ import retrofit2.http.GET
 import javax.inject.Singleton
 
 const val BASE_URL = "https://apiv3.apifootball.com/"
-const val matchEventUrl = "$BASE_URL?action=get_events&from=2021-08-11&to=2021-08-11&timezone=Africa/Nairobi&APIkey=1d6b403d5466ef49debd6ff0c505420880d36d828c2e587c49f7f46fd48eb30c"
+const val matchEventUrl = "$BASE_URL?action=get_events&from=2021-08-14&to=2021-08-14&timezone=Africa/Nairobi&APIkey=8d384aa5f27bf83b7d9835be1d2ff01e2909c92a1f50af5c4466b6d0ead7d6a8"
 
 interface RetrofitService {
 
     @GET(matchEventUrl)
     suspend fun getMatchEventsForDateRange(): Response<List<Events>>
-
-/*
-    companion object{
-        var retrofitService: RetrofitService? = null
-        fun getInstance(): RetrofitService {
-            if (retrofitService == null) {
-                val retrofit = Retrofit.Builder()
-                    .baseUrl("https://apiv3.apifootball.com/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-                retrofitService = retrofit.create(RetrofitService::class.java)
-            }
-            return retrofitService!!
-        }
-    }
-*/
 
 }

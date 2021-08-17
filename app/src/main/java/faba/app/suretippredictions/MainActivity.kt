@@ -32,26 +32,51 @@ class MainActivity : ComponentActivity() {
                 val matchEventList = ArrayList<Events>()
                 for (matchevent in it) {
                     //Log.e(localClassName, matchevent.match_id + " " + matchevent.match_hometeam_name)
-                    matchEventList.add(matchevent)
-                }
-
-                predictionsViewModel.insert(
-                    MatchEvents(
-                        1,
-                        matchEventList
+                    //matchEventList.add(matchevent)
+                    predictionsViewModel.insert(
+                        MatchEvents(
+                            matchevent.match_id.toInt(),
+                            matchevent.match_date,
+                            matchevent
+                        )
                     )
-                )
+                }
 
 
             })
 
+/*
             predictionsViewModel.roomMatchEventsList.observe(this, { events ->
                 events?.let {
-                    for(matchevent in it.matchEvents){
-                        Log.e(localClassName, matchevent.match_id + " " + matchevent.match_hometeam_name)
+
+                    for (event in events) {
+                        Log.e(
+                            localClassName,
+                            event.matchEvents.match_id + " " + event.matchEvents.match_hometeam_name
+                        )
+
                     }
+
+
                 }
             })
+*/
+
+            predictionsViewModel.roomMatchEventsByDate("2021-08-14").observe(this, { events ->
+                events?.let {
+
+                    for (event in events) {
+                        Log.e(
+                            localClassName,
+                            event.matchEvents.match_id + " " + event.matchEvents.match_hometeam_name
+                        )
+
+                    }
+
+
+                }
+            })
+
 
             predictionsViewModel.loading.observe(this, Observer {
                 if (it) Log.e(localClassName, "Loading")
@@ -61,7 +86,9 @@ class MainActivity : ComponentActivity() {
                 Log.e(localClassName, it)
             })
 
-            predictionsViewModel.getAllMatchEvents()
+            //predictionsViewModel.getAllMatchEvents()
+
+
         }
     }
 }

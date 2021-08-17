@@ -11,7 +11,11 @@ import kotlinx.coroutines.flow.Flow
 interface PredictionsDao {
 
     @Query("SELECT * FROM match_events_table ORDER BY match_id ASC")
-    fun getAllMatchEvents(): Flow<MatchEvents>
+    fun getAllMatchEvents(): Flow<List<MatchEvents>>
+
+    @Query("SELECT * FROM match_events_table WHERE match_date = :match_date ORDER BY match_id ASC")
+    fun getAllMatchEventsByDate(match_date : String): Flow<List<MatchEvents>>
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(events: MatchEvents)

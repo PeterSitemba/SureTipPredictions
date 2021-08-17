@@ -8,14 +8,14 @@ import faba.app.suretippredictions.models.events.Events
 class Converter {
 
     @TypeConverter
-    fun toEvent(json: String): List<Events> {
-        val type = object : TypeToken<List<Events>>() {}.type
+    fun toEvent(json: String): Events {
+        val type = object : TypeToken<Events>() {}.type
         return Gson().fromJson(json, type)
     }
 
     @TypeConverter
-    fun toJson(events: List<Events>): String {
-        val type = object: TypeToken<List<Events>>() {}.type
+    fun toJson(events: Events): String {
+        val type = object: TypeToken<Events>() {}.type
         return Gson().toJson(events, type)
     }
 }
