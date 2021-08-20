@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
             predictionsViewModel.matchEventsList.observe(this, {
                 //Log.e(localClassName, it.toString())
 
-                val matchEventList = ArrayList<Events>()
+                //val matchEventList = ArrayList<Events>()
                 for (matchevent in it) {
                     //Log.e(localClassName, matchevent.match_id + " " + matchevent.match_hometeam_name)
                     //matchEventList.add(matchevent)
@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
             })
 */
 
-            predictionsViewModel.roomMatchEventsByDate("2021-08-14").observe(this, { events ->
+            predictionsViewModel.roomMatchEventsByDate("2021-08-20").observe(this, { events ->
                 events?.let {
 
                     for (event in events) {
@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                 Log.e(localClassName, it)
             })
 
-            predictionsViewModel.getAllMatchEvents()
+            //predictionsViewModel.getAllMatchEvents()
 
 
         }

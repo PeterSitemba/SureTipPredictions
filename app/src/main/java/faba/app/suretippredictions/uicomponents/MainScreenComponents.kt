@@ -2,21 +2,191 @@ package faba.app.suretippredictions.uicomponents
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Bottom
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import faba.app.suretippredictions.R
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 
 
 @Composable
 fun PredictionListItem() {
+
+    Surface {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp)
+                .height(120.dp), elevation = 6.dp
+        ) {
+
+            Column {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+
+                        val (icon, text) = createRefs()
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = "fav",
+                            modifier = Modifier
+                                .size(width = 27.dp, height = 27.dp)
+                                .padding(start = 5.dp, top = 5.dp)
+                                .constrainAs(icon) {
+                                    start.linkTo(parent.start)
+                                }
+                        )
+
+                        Text(
+                            text = "16 Apr 17:20",
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.constrainAs(text) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
+
+                        )
+
+
+                    }
+
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+
+                    Column(
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Image(
+                            painterResource(id = R.drawable.man_u),
+                            contentDescription = "team_one",
+                            modifier = Modifier
+                                .size(width = 47.dp, height = 47.dp)
+                                .offset(y = (-10).dp)
+                                .align(CenterHorizontally)
+                        )
+
+                        Text(
+                            text = "Manchester United",
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            maxLines = 2,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Text(
+                            text = "2 - 0",
+                            textAlign = TextAlign.Center,
+                            fontSize = 25.sp,
+                            maxLines = 2,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 5.dp)
+                        )
+
+                        Surface(
+                            color = Color.Gray,
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier
+                                .padding(top = 20.dp)
+                                .size(width = 104.dp, height = 17.dp)
+
+                        ) {
+                            Text(
+                                text = "Home Win or Draw",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+
+                        }
+
+                        Text(
+                            text = "Odds : 1.32",
+                            textAlign = TextAlign.Center,
+                            fontSize = 11.sp,
+                            maxLines = 2,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+
+                    }
+
+                    Column(
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Image(
+                            painterResource(id = R.drawable.city),
+                            contentDescription = "team_one",
+                            modifier = Modifier
+                                .size(width = 47.dp, height = 47.dp)
+                                .offset(y = (-10).dp)
+                                .align(CenterHorizontally)
+                        )
+
+                        Text(
+                            text = "Manchester City",
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            maxLines = 2,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+
+                }
+
+
+            }
+
+
+        }
+
+
+    }
+
+
+}
+
+/*fun PredictionListItemTwo() {
 
 
     Column(
@@ -49,7 +219,7 @@ fun PredictionListItem() {
                 })
 
                 Text(text = " vs ", modifier = Modifier.constrainAs(vs){
-                        centerHorizontallyTo(parent)
+                    centerHorizontallyTo(parent)
                 })
 
                 Text(text = "Leeds United", modifier = Modifier.constrainAs(team2){
@@ -81,7 +251,7 @@ fun PredictionListItem() {
     }
 
 
-}
+}*/
 
 @Composable
 fun PredictionHeaderItem() {
@@ -90,10 +260,11 @@ fun PredictionHeaderItem() {
 
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
 fun PredictionListItemPreview() {
     SureTipPredictionsTheme {
         PredictionListItem()
     }
 }
+
