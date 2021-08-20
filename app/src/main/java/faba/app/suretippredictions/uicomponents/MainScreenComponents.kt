@@ -186,6 +186,168 @@ fun PredictionListItem() {
 
 }
 
+
+//To be removed, look at theming on android code labs
+@Composable
+fun PredictionListItemDark() {
+
+    Surface(color = Color.DarkGray) {
+
+        Card(
+            backgroundColor = Color.Black,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp)
+                .height(120.dp), elevation = 6.dp
+        ) {
+
+            Column {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+
+                        val (icon, text) = createRefs()
+                        Icon(
+                            painter = painterResource(id = R.drawable.outline_star_white_24),
+                            contentDescription = "fav",
+                            modifier = Modifier
+                                .size(width = 27.dp, height = 27.dp)
+                                .padding(start = 5.dp, top = 5.dp)
+                                .constrainAs(icon) {
+                                    start.linkTo(parent.start)
+                                }
+                        )
+
+                        Text(
+                            text = "16 Apr 17:20",
+                            textAlign = TextAlign.Center,
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.constrainAs(text) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
+
+                        )
+
+
+                    }
+
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+
+                    Column(
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Image(
+                            painterResource(id = R.drawable.man_u),
+                            contentDescription = "team_one",
+                            modifier = Modifier
+                                .size(width = 47.dp, height = 47.dp)
+                                .offset(y = (-10).dp)
+                                .align(CenterHorizontally)
+                        )
+
+                        Text(
+                            text = "Manchester United",
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            maxLines = 2,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Text(
+                            text = "2 - 0",
+                            textAlign = TextAlign.Center,
+                            fontSize = 25.sp,
+                            maxLines = 2,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 5.dp)
+                        )
+
+                        Surface(
+                            color = Color.Green,
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier
+                                .padding(top = 20.dp)
+                                .size(width = 104.dp, height = 17.dp)
+
+                        ) {
+                            Text(
+                                text = "Home Win or Draw",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+
+                        }
+
+                        Text(
+                            text = "Odds : 1.32",
+                            textAlign = TextAlign.Center,
+                            fontSize = 11.sp,
+                            maxLines = 2,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+
+                    }
+
+                    Column(
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Image(
+                            painterResource(id = R.drawable.city),
+                            contentDescription = "team_one",
+                            modifier = Modifier
+                                .size(width = 47.dp, height = 47.dp)
+                                .offset(y = (-10).dp)
+                                .align(CenterHorizontally)
+                        )
+
+                        Text(
+                            text = "Manchester City",
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            maxLines = 2,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+
+                }
+
+
+            }
+
+
+        }
+
+
+    }
+
+
+}
+
 /*fun PredictionListItemTwo() {
 
 
@@ -264,7 +426,7 @@ fun PredictionHeaderItem() {
 @Composable
 fun PredictionListItemPreview() {
     SureTipPredictionsTheme {
-        PredictionListItem()
+        PredictionListItemDark()
     }
 }
 
