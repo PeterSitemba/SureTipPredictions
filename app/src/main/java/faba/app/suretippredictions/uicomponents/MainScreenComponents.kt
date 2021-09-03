@@ -2,32 +2,41 @@ package faba.app.suretippredictions.uicomponents
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.Bottom
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import faba.app.suretippredictions.R
+import faba.app.suretippredictions.database.MatchEvents
+import faba.app.suretippredictions.models.events.Events
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 
+
+@Composable
+fun PredictionsScreen(events: List<MatchEvents>) {
+
+    LazyColumn() {
+        items(events) { event ->
+            PredictionListItemDark(event.matchEvents)
+        }
+    }
+
+}
 
 @Composable
 fun PredictionListItem() {
@@ -188,8 +197,9 @@ fun PredictionListItem() {
 
 
 //To be removed, look at theming on android code labs
+@ExperimentalCoilApi
 @Composable
-fun PredictionListItemDark() {
+fun PredictionListItemDark(event: Events) {
 
     Surface(color = Color.DarkGray) {
 
@@ -218,7 +228,7 @@ fun PredictionListItemDark() {
                         )
 
                         Text(
-                            text = "16 Apr 17:20",
+                            text = "${event.match_date} ${event.match_time}",
                             textAlign = TextAlign.Center,
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
@@ -244,7 +254,7 @@ fun PredictionListItemDark() {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Image(
-                            painterResource(id = R.drawable.man_u),
+                            painter = rememberImagePainter(event.team_home_badge),
                             contentDescription = "team_one",
                             modifier = Modifier
                                 .size(width = 47.dp, height = 47.dp)
@@ -253,7 +263,7 @@ fun PredictionListItemDark() {
                         )
 
                         Text(
-                            text = "Manchester United",
+                            text = event.match_hometeam_name,
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp,
                             color = Color.White,
@@ -267,7 +277,7 @@ fun PredictionListItemDark() {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Text(
-                            text = "2 - 0",
+                            text = "${event.match_hometeam_ft_score} - ${event.match_awayteam_ft_score}",
                             textAlign = TextAlign.Center,
                             fontSize = 25.sp,
                             maxLines = 2,
@@ -314,7 +324,7 @@ fun PredictionListItemDark() {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Image(
-                            painterResource(id = R.drawable.city),
+                            painter = rememberImagePainter(event.team_away_badge),
                             contentDescription = "team_one",
                             modifier = Modifier
                                 .size(width = 47.dp, height = 47.dp)
@@ -323,7 +333,7 @@ fun PredictionListItemDark() {
                         )
 
                         Text(
-                            text = "Manchester City",
+                            text = event.match_awayteam_name,
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp,
                             color = Color.White,
@@ -426,7 +436,7 @@ fun PredictionHeaderItem() {
 @Composable
 fun PredictionListItemPreview() {
     SureTipPredictionsTheme {
-        PredictionListItemDark()
+        //PredictionListItemDark()
     }
 }
 

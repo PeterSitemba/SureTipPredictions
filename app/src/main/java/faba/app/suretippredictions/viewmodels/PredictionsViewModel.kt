@@ -17,10 +17,8 @@ class PredictionsViewModel @Inject constructor(private val predictionsRepository
     val matchEventsList = MutableLiveData<List<Events>>()
     val roomMatchEventsList: LiveData<List<MatchEvents>> =
         predictionsRepository.roomMatchEventsList.asLiveData()
-
     /*  val roomMatchEventsListByDate: LiveData<List<MatchEvents>> =
           predictionsRepository.roomMatchEventsListByDate.asLiveData()*/
-    var job: Job? = null
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         onError("Exception handled: ${throwable.localizedMessage}")
 
@@ -36,15 +34,16 @@ class PredictionsViewModel @Inject constructor(private val predictionsRepository
 
     fun getAllMatchEvents() {
 
-        job = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
-
-            val response = predictionsRepository.getAllMatchEvents()
-            withContext(Dispatchers.Main) {
-                if (response.isSuccessful) {
-                    matchEventsList.postValue(response.body())
-                    loading.value = false
-                } else {
-                    onError("Error : ${response.message()}")
+        viewModelScope.launch {
+            withContext(Dispatchers.IO + exceptionHandler) {
+                val response = predictionsRepository.getAllMatchEvents()
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        matchEventsList.postValue(response.body())
+                        loading.value = false
+                    } else {
+                        onError("Error : ${response.message()}")
+                    }
                 }
             }
 
@@ -57,10 +56,4 @@ class PredictionsViewModel @Inject constructor(private val predictionsRepository
         errorMessage.postValue(message)
         loading.postValue(false)
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        job?.cancel()
-    }
-
 }
