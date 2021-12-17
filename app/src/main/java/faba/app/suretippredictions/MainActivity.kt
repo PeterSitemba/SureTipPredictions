@@ -25,9 +25,16 @@ class MainActivity : ComponentActivity() {
 
             predictionsViewModel.predictionListResponse.observe(this , {
                 it.forEach{ prediction ->
-                    Log.e("The date is!! " , prediction.date)
+                    Log.e("The pred date is!! " , prediction.predictions?.winner?.comment.toString())
                 }
             })
+
+            predictionsViewModel.oddsListResponse.observe(this , {
+                it.forEach{ odds ->
+                    Log.e("The odd date is!! " , odds.date)
+                }
+            })
+
 
         }
     }

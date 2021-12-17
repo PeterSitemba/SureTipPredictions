@@ -108,7 +108,7 @@ dependencies {
     api "com.apollographql.apollo:apollo-coroutines-support:$apollo_version"
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
-    implementation 'com.google.code.gson:gson:2.8.6'
+    api 'com.google.code.gson:gson:2.8.6'
 
     //accompanyst api
     implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"

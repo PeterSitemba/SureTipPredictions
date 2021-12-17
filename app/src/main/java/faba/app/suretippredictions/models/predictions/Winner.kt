@@ -4,5 +4,5 @@ package faba.app.suretippredictions.models.predictions
 data class Winner(
     val id: Int,
     val name: String,
-    val comment: String
+    val comment: String?
 )
