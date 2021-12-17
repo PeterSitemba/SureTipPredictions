@@ -22,11 +22,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import faba.app.suretippredictions.R
-import faba.app.suretippredictions.database.MatchEvents
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 
 
-@Composable
+/*@Composable
 fun PredictionsScreen(events: List<MatchEvents>) {
 
     LazyColumn() {
@@ -35,7 +34,7 @@ fun PredictionsScreen(events: List<MatchEvents>) {
         }
     }
 
-}
+}*/
 
 @Composable
 fun PredictionListItem() {

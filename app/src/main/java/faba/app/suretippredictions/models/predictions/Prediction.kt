@@ -2,56 +2,39 @@ package faba.app.suretippredictions.models.predictions
 
 data class Prediction(
     val id: Int,
-    val awayGoalsForAverage: GoalsAverage,
-    val comparison: Comparison,
-    val homeForm: String,
-    val status: Status,
-    val score: Score,
-    val homeName: String,
-    val awayId: Int,
-    val homeFailedToScore: FailedToScore,
     val date: String,
-    val awayLastFive: Last5,
-    val homeCleanSheet: CleanSheet,
-    val awayLogo: String,
-    val awayGoalsForTotal: GoalsTotal,
-    val homeGoalsForTotal: GoalsTotal,
-    val homeGoalsAgainstAverage: GoalsAverage,
-    val homeLastFive: Last5,
-    val homeGoalsForAverage: GoalsAverage,
-    val league: League,
-    val awayFailedToScore: FailedToScore,
-    val awayGoalsAgainstTotal: GoalsTotal,
-    val awayName: String,
-    val homeLogo: String,
-    val awayBiggest: Biggest,
-    val homeBiggest: Biggest,
-    val homeGoalsAgainstTotal: GoalsTotal,
-    val awayCleanSheet: CleanSheet,
-    val awayFixtures: Fixtures,
-    val homeId: Int,
-    val homeFixtures: Fixtures,
-    val predictions: Predictions,
-    val awayPenalty: Penalty,
-    val homePenalty: Penalty,
-    val awayGoalsAgainstAverage: GoalsAverage,
-    val awayForm: String,
+    val status: Status?,
+    val score: Score?,
+    val predictions: Predictions?,
+    val league: League?,
+    val homeId: Int?,
+    val homeName: String?,
+    val homeLogo: String?,
+    val homeLastFive: Last5?,
+    val homeForm: String?,
+    val homeFixtures: Fixtures?,
+    val homeGoalsForTotal: GoalsTotal?,
+    val homeGoalsForAverage: GoalsAverage?,
+    val homeGoalsAgainstTotal: GoalsTotal?,
+    val homeGoalsAgainstAverage: GoalsAverage?,
+    val homeBiggest: Biggest?,
+    val homeCleanSheet: CleanSheet?,
+    val homeFailedToScore: FailedToScore?,
+    val homePenalty: Penalty?,
+    val awayId: Int?,
+    val awayName: String?,
+    val awayLogo: String?,
+    val awayLastFive: Last5?,
+    val awayForm: String?,
+    val awayFixtures: Fixtures?,
+    val awayGoalsForTotal: GoalsTotal?,
+    val awayGoalsForAverage: GoalsAverage?,
+    val awayGoalsAgainstTotal: GoalsTotal?,
+    val awayGoalsAgainstAverage: GoalsAverage?,
+    val awayBiggest: Biggest?,
+    val awayCleanSheet: CleanSheet?,
+    val awayFailedToScore: FailedToScore?,
+    val awayPenalty: Penalty?,
+    val comparison: Comparison?,
     val h2h: MutableList<FixturesH2H>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 )

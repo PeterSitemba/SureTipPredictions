@@ -1,0 +1,50 @@
+query ListPredictions($date: String!) {
+    listOdds(filter: {date: {contains: $date}}) {
+        items {
+            bookmaker
+            fixture
+            id
+            date
+        }
+    }
+    listPredictions(filter: {date: {contains: $date}}) {
+        items {
+            awayBiggest
+            awayCleanSheet
+            awayFailedToScore
+            awayFixtures
+            awayForm
+            awayGoalsAgainstAverage
+            awayGoalsAgainstTotal
+            awayGoalsForAverage
+            awayGoalsForTotal
+            awayId
+            awayLastFive
+            awayLogo
+            awayName
+            awayPenalty
+            comparison
+            date
+            h2h
+            homeBiggest
+            homeCleanSheet
+            homeFailedToScore
+            homeFixtures
+            homeForm
+            homeGoalsAgainstAverage
+            homeGoalsAgainstTotal
+            homeGoalsForAverage
+            homeGoalsForTotal
+            homeId
+            homeLastFive
+            homeLogo
+            homeName
+            homePenalty
+            id
+            league
+            predictions
+            score
+            status
+        }
+    }
+}
