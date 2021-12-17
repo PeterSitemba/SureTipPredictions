@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id("com.apollographql.apollo").version("$apollo_version")
 }
 
 android {
@@ -61,6 +62,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-beta02"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation project(path: ':core')
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -95,10 +97,19 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
 
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.1"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.4.0"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$viewmodel_compose_version"
 
     //image dependency
     implementation "io.coil-kt:coil-compose:$coil_version"
+
+    api "com.apollographql.apollo:apollo-runtime:$apollo_version"
+    api "com.apollographql.apollo:apollo-coroutines-support:$apollo_version"
+
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    //accompanyst api
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
 }

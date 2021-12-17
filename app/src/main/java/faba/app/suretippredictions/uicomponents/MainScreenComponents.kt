@@ -23,7 +23,6 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.MatchEvents
-import faba.app.suretippredictions.models.events.Events
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 
 
@@ -32,7 +31,7 @@ fun PredictionsScreen(events: List<MatchEvents>) {
 
     LazyColumn() {
         items(events) { event ->
-            PredictionListItemDark(event.matchEvents)
+            //PredictionListItemDark(event.matchEvents)
         }
     }
 
@@ -197,7 +196,7 @@ fun PredictionListItem() {
 
 
 //To be removed, look at theming on android code labs
-@ExperimentalCoilApi
+/*@ExperimentalCoilApi
 @Composable
 fun PredictionListItemDark(event: Events) {
 
@@ -356,7 +355,7 @@ fun PredictionListItemDark(event: Events) {
     }
 
 
-}
+}*/
 
 /*fun PredictionListItemTwo() {
 

@@ -4,9 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import faba.app.suretippredictions.models.events.Events
 import kotlinx.coroutines.flow.Flow
 
+/*
 @Dao
 interface PredictionsDao {
 
@@ -23,4 +23,4 @@ interface PredictionsDao {
     @Query("DELETE FROM match_events_table")
     suspend fun deleteAll()
 
-}
+}*/

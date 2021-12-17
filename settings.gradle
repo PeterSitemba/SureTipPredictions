@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "SureTip Predictions"
 include ':app'
+include ':core'

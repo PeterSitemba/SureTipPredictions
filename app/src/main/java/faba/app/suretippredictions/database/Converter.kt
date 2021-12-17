@@ -3,11 +3,10 @@ package faba.app.suretippredictions.database
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import faba.app.suretippredictions.models.events.Events
 
 class Converter {
 
-    @TypeConverter
+    /*@TypeConverter
     fun toEvent(json: String): Events {
         val type = object : TypeToken<Events>() {}.type
         return Gson().fromJson(json, type)
@@ -17,5 +16,5 @@ class Converter {
     fun toJson(events: Events): String {
         val type = object: TypeToken<Events>() {}.type
         return Gson().toJson(events, type)
-    }
+    }*/
 }
