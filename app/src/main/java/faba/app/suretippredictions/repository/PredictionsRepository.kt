@@ -9,9 +9,9 @@ import javax.inject.Inject
 class PredictionsRepository @Inject constructor(
     private val api: Apollo
 ) : SafeGuardApiRequest(){
-    suspend fun listPredictions(date: String): ListPredictionsQuery.Data {
+    suspend fun listPredictions(date: String, nextToken: String): ListPredictionsQuery.Data {
         return apiRequest {
-            api.getApolloClient().query(ListPredictionsQuery(date)).await()
+            api.getApolloClient().query(ListPredictionsQuery(date, nextToken)).await()
         }
     }
 }

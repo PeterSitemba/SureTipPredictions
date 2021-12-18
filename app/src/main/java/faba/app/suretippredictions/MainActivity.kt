@@ -21,17 +21,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            predictionsViewModel.listPredictions("2021-12-16")
+            predictionsViewModel.listPredictions("2021-12-03")
 
             predictionsViewModel.predictionListResponse.observe(this , {
                 it.forEach{ prediction ->
-                    Log.e("The pred date is!! " , prediction.predictions?.winner?.comment.toString())
+                    Log.e("The pred is!! " , prediction.predictions?.winner?.comment.toString())
                 }
             })
 
             predictionsViewModel.oddsListResponse.observe(this , {
                 it.forEach{ odds ->
-                    Log.e("The odd date is!! " , odds.date)
+                    Log.e("The odd id is!! " , odds.id.toString())
                 }
             })
 

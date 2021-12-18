@@ -1,5 +1,6 @@
 package faba.app.suretippredictions.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -23,104 +24,167 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     val predictionListResponse = MutableLiveData<MutableList<Prediction>>()
     val oddsListResponse = MutableLiveData<MutableList<Odds>>()
 
+    var predCounter = 0
+    var oddCounter = 0
+
     fun listPredictions(date: String) {
         val predictionList = mutableListOf<Prediction>()
         val oddsList = mutableListOf<Odds>()
         viewModelScope.launch {
             try {
-                val response = repository.listPredictions(date)
-                response.let { data ->
+                withContext(Dispatchers.IO) {
+                    var response = repository.listPredictions(date, "")
 
-                    data.listPredictions()?.items()?.forEach {
+                    while (true) {
 
-                        val prediction = Prediction(
-                            it!!.id(),
-                            it.date()!!,
-                            gson.fromJson(it.status() as String?, Status::class.java),
-                            gson.fromJson(it.score() as String?, Score::class.java),
-                            gson.fromJson(it.predictions() as String?, Predictions::class.java),
-                            gson.fromJson(it.league() as String?, League::class.java),
-                            it.homeId(),
-                            it.homeName(),
-                            it.homeLogo(),
-                            gson.fromJson(it.homeLastFive() as String?, Last5::class.java),
-                            it.homeForm(),
-                            gson.fromJson(it.homeFixtures() as String?, Fixtures::class.java),
-                            gson.fromJson(
-                                it.homeGoalsForTotal() as String?,
-                                GoalsTotal::class.java
-                            ),
-                            gson.fromJson(
-                                it.homeGoalsForAverage() as String?,
-                                GoalsAverage::class.java
-                            ),
-                            gson.fromJson(
-                                it.homeGoalsAgainstTotal() as String?,
-                                GoalsTotal::class.java
-                            ),
-                            gson.fromJson(
-                                it.homeGoalsAgainstAverage() as String?,
-                                GoalsAverage::class.java
-                            ),
-                            gson.fromJson(it.homeBiggest() as String?, Biggest::class.java),
-                            gson.fromJson(it.homeCleanSheet() as String?, CleanSheet::class.java),
-                            gson.fromJson(
-                                it.homeFailedToScore() as String?,
-                                FailedToScore::class.java
-                            ),
-                            gson.fromJson(it.homePenalty() as String?, Penalty::class.java),
-                            it.awayId(),
-                            it.awayName(),
-                            it.awayLogo(),
-                            gson.fromJson(it.awayLastFive() as String?, Last5::class.java),
-                            it.awayForm(),
-                            gson.fromJson(it.awayFixtures() as String?, Fixtures::class.java),
-                            gson.fromJson(
-                                it.awayGoalsForTotal() as String?,
-                                GoalsTotal::class.java
-                            ),
-                            gson.fromJson(
-                                it.awayGoalsForAverage() as String?,
-                                GoalsAverage::class.java
-                            ),
-                            gson.fromJson(
-                                it.awayGoalsAgainstTotal() as String?,
-                                GoalsTotal::class.java
-                            ),
-                            gson.fromJson(
-                                it.awayGoalsAgainstAverage() as String?,
-                                GoalsAverage::class.java
-                            ),
-                            gson.fromJson(it.awayBiggest() as String?, Biggest::class.java),
-                            gson.fromJson(it.awayCleanSheet() as String?, CleanSheet::class.java),
-                            gson.fromJson(
-                                it.awayFailedToScore() as String?,
-                                FailedToScore::class.java
-                            ),
-                            gson.fromJson(it.awayPenalty() as String?, Penalty::class.java),
-                            gson.fromJson(it.comparison() as String?, Comparison::class.java),
-                            gson.fromJson(it.h2h() as String?, Array<FixturesH2H>::class.java)
-                                .toMutableList()
+                        response.let { data ->
 
+                            data.listPredictions()?.items()?.forEach {
+
+                                val prediction = Prediction(
+                                    it!!.id(),
+                                    it.predictionDate(),
+                                    gson.fromJson(it.status() as String?, Status::class.java),
+                                    gson.fromJson(it.score() as String?, Score::class.java),
+                                    gson.fromJson(
+                                        it.predictions() as String?,
+                                        Predictions::class.java
+                                    ),
+                                    gson.fromJson(it.league() as String?, League::class.java),
+                                    it.homeId(),
+                                    it.homeName(),
+                                    it.homeLogo(),
+                                    gson.fromJson(it.homeLastFive() as String?, Last5::class.java),
+                                    it.homeForm(),
+                                    gson.fromJson(
+                                        it.homeFixtures() as String?,
+                                        Fixtures::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.homeGoalsForTotal() as String?,
+                                        GoalsTotal::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.homeGoalsForAverage() as String?,
+                                        GoalsAverage::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.homeGoalsAgainstTotal() as String?,
+                                        GoalsTotal::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.homeGoalsAgainstAverage() as String?,
+                                        GoalsAverage::class.java
+                                    ),
+                                    gson.fromJson(it.homeBiggest() as String?, Biggest::class.java),
+                                    gson.fromJson(
+                                        it.homeCleanSheet() as String?,
+                                        CleanSheet::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.homeFailedToScore() as String?,
+                                        FailedToScore::class.java
+                                    ),
+                                    gson.fromJson(it.homePenalty() as String?, Penalty::class.java),
+                                    it.awayId(),
+                                    it.awayName(),
+                                    it.awayLogo(),
+                                    gson.fromJson(it.awayLastFive() as String?, Last5::class.java),
+                                    it.awayForm(),
+                                    gson.fromJson(
+                                        it.awayFixtures() as String?,
+                                        Fixtures::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.awayGoalsForTotal() as String?,
+                                        GoalsTotal::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.awayGoalsForAverage() as String?,
+                                        GoalsAverage::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.awayGoalsAgainstTotal() as String?,
+                                        GoalsTotal::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.awayGoalsAgainstAverage() as String?,
+                                        GoalsAverage::class.java
+                                    ),
+                                    gson.fromJson(it.awayBiggest() as String?, Biggest::class.java),
+                                    gson.fromJson(
+                                        it.awayCleanSheet() as String?,
+                                        CleanSheet::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.awayFailedToScore() as String?,
+                                        FailedToScore::class.java
+                                    ),
+                                    gson.fromJson(it.awayPenalty() as String?, Penalty::class.java),
+                                    gson.fromJson(
+                                        it.comparison() as String?,
+                                        Comparison::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.h2h() as String?,
+                                        Array<FixturesH2H>::class.java
+                                    )
+                                        .toMutableList()
+
+                                )
+                                predictionList.add(prediction)
+
+                                predCounter++
+
+                            }
+
+
+                            //add paging here as well
+
+                            data.listOdds()?.items()?.forEach {
+                                val odds = Odds(
+                                    it.id(),
+                                    it.date()!!,
+                                    gson.fromJson(it.fixture() as String?, Fixture::class.java),
+                                    gson.fromJson(
+                                        it.bookmaker() as String?,
+                                        Array<Bookmaker>::class.java
+                                    )
+                                        .toList()
+                                )
+                                oddsList.add(odds)
+                                oddCounter++
+                            }
+
+                        }
+
+                        if (response.listPredictions()?.nextToken() == null) break
+
+                        response = repository.listPredictions(
+                            date,
+                            response.listPredictions()?.nextToken()!!
                         )
-                        predictionList.add(prediction)
+
+
                     }
 
-                    predictionListResponse.value = predictionList
 
-                    data.listOdds()?.items()?.forEach {
-                        val odds = Odds(
-                            it.id(),
-                            it.date()!!,
-                            gson.fromJson(it.fixture() as String?, Fixture::class.java),
-                            gson.fromJson(it.bookmaker() as String?, Array<Bookmaker>::class.java)
-                                .toList()
-                        )
-                        oddsList.add(odds)
-                    }
+                }
+
+                withContext(Dispatchers.Main) {
+
+                    Log.e("Pred Counter ", predCounter.toString())
+                    Log.e("Odds Counter ", oddCounter.toString())
 
                     oddsListResponse.value = oddsList
+                    predictionListResponse.value = predictionList
+
                 }
+
+                /* withContext(Dispatchers.Main){
+
+                 }*/
+
 
             } catch (e: ApiException) {
                 //progressListener?.onFailure(e.message!!)

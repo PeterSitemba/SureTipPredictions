@@ -1,13 +1,5 @@
-query ListPredictions($date: String!) {
-    listOdds(filter: {date: {contains: $date}}) {
-        items {
-            bookmaker
-            fixture
-            id
-            date
-        }
-    }
-    listPredictions(filter: {date: {contains: $date}}) {
+query ListPredictions($date: String!, $nextToken: String!) {
+    listPredictions(predictionDate: $date, nextToken: $nextToken) {
         items {
             awayBiggest
             awayCleanSheet
@@ -24,7 +16,6 @@ query ListPredictions($date: String!) {
             awayName
             awayPenalty
             comparison
-            date
             h2h
             homeBiggest
             homeCleanSheet
@@ -42,9 +33,20 @@ query ListPredictions($date: String!) {
             homePenalty
             id
             league
+            predictionDate
             predictions
             score
             status
+        }
+        nextToken
+    }
+
+    listOdds(filter: {date: {contains: $date}}) {
+        items {
+            bookmaker
+            fixture
+            id
+            date
         }
     }
 }
