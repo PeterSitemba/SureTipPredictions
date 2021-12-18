@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            predictionsViewModel.listPredictions("2021-12-03")
+            predictionsViewModel.listPredictions("2021-12-22")
 
             predictionsViewModel.predictionListResponse.observe(this , {
                 it.forEach{ prediction ->

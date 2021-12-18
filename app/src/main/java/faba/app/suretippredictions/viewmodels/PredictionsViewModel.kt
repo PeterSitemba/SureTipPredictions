@@ -33,12 +33,11 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    var response = repository.listPredictions(date, "")
+                    var response = repository.listPredictions(date, "", "")
 
                     while (true) {
 
                         response.let { data ->
-
                             data.listPredictions()?.items()?.forEach {
 
                                 val prediction = Prediction(
@@ -132,8 +131,10 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                         .toMutableList()
 
                                 )
-                                predictionList.add(prediction)
 
+                                if(!predictionList.any{ prediction -> prediction.id == it.id()}){
+                                    predictionList.add(prediction)
+                                }
                                 predCounter++
 
                             }
@@ -144,7 +145,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                             data.listOdds()?.items()?.forEach {
                                 val odds = Odds(
                                     it.id(),
-                                    it.date()!!,
+                                    it.oddDate(),
                                     gson.fromJson(it.fixture() as String?, Fixture::class.java),
                                     gson.fromJson(
                                         it.bookmaker() as String?,
@@ -152,18 +153,45 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                     )
                                         .toList()
                                 )
-                                oddsList.add(odds)
+
+                                if(!oddsList.any{ odd -> odd.id == it.id()}){
+                                    oddsList.add(odds)
+                                }
                                 oddCounter++
                             }
 
                         }
 
-                        if (response.listPredictions()?.nextToken() == null) break
+                        if (response.listPredictions()?.nextToken() == null && response.listOdds()
+                                ?.nextToken() == null
+                        ) break
 
-                        response = repository.listPredictions(
-                            date,
-                            response.listPredictions()?.nextToken()!!
-                        )
+                        if (response.listPredictions()?.nextToken() == null && response.listOdds()
+                                ?.nextToken() != null
+                        ) {
+                            response = repository.listPredictions(
+                                date,
+                                "",
+                                response.listOdds()?.nextToken()!!
+                            )
+
+                        } else if (response.listPredictions()
+                                ?.nextToken() != null && response.listOdds()?.nextToken() == null
+                        ) {
+                            response = repository.listPredictions(
+                                date,
+                                response.listPredictions()?.nextToken()!!,
+                                ""
+                            )
+
+                        } else {
+                            response = repository.listPredictions(
+                                date,
+                                response.listPredictions()?.nextToken()!!,
+                                response.listOdds()?.nextToken()!!
+                            )
+
+                        }
 
 
                     }
