@@ -3,13 +3,14 @@ package faba.app.suretippredictions.viewmodels
 import android.util.Log
 import androidx.lifecycle.*
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import faba.app.core.ApiException
 import faba.app.core.NoInternetException
+import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.models.odds.Bookmaker
 import faba.app.suretippredictions.models.odds.Fixture
-import faba.app.suretippredictions.models.odds.Odds
+import faba.app.suretippredictions.database.Odds
+import faba.app.suretippredictions.database.PredictionAndOdds
 import faba.app.suretippredictions.models.predictions.*
 import faba.app.suretippredictions.repository.PredictionsRepository
 import kotlinx.coroutines.*
@@ -26,6 +27,12 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
     var predCounter = 0
     var oddCounter = 0
+
+    val predCounterResponse = MutableLiveData<Int>()
+    val oddCounterResponse = MutableLiveData<Int>()
+
+
+
 
     fun listPredictions(date: String) {
         val predictionList = mutableListOf<Prediction>()
@@ -132,7 +139,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                                 )
 
-                                if(!predictionList.any{ prediction -> prediction.id == it.id()}){
+                                if (!predictionList.any { prediction -> prediction.id == it.id() }) {
                                     predictionList.add(prediction)
                                 }
                                 predCounter++
@@ -154,7 +161,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                         .toList()
                                 )
 
-                                if(!oddsList.any{ odd -> odd.id == it.id()}){
+                                if (!oddsList.any { odd -> odd.id == it.id() }) {
                                     oddsList.add(odds)
                                 }
                                 oddCounter++
@@ -199,20 +206,23 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                 }
 
-                withContext(Dispatchers.Main) {
 
-                    Log.e("Pred Counter ", predCounter.toString())
-                    Log.e("Odds Counter ", oddCounter.toString())
-
-                    oddsListResponse.value = oddsList
-                    predictionListResponse.value = predictionList
-
+                oddsList.forEach {
+                    repository.insertOdds(it)
+                }
+                predictionList.forEach {
+                    repository.insertPrediction(it)
                 }
 
-                /* withContext(Dispatchers.Main){
 
-                 }*/
 
+
+                withContext(Dispatchers.Main) {
+                    predCounterResponse.value = predCounter
+                    oddCounterResponse.value = oddCounter
+                    //Log.e("Pred Counter ", predCounter.toString())
+                    //Log.e("Odds Counter ", oddCounter.toString())
+                }
 
             } catch (e: ApiException) {
                 //progressListener?.onFailure(e.message!!)
@@ -221,6 +231,21 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
             }
         }
     }
+
+    fun roomPredictionsAndOddsList(date: String): LiveData<List<PredictionAndOdds>> {
+        return repository.roomPredictionsAndOddsList(date).asLiveData()
+    }
+
+    fun roomPredictionsList(date: String): LiveData<List<Prediction>> {
+        return repository.roomPredictionsList(date).asLiveData()
+    }
+
+    fun roomOddsList(date: String): LiveData<List<Odds>> {
+        return repository.roomOddsList(date).asLiveData()
+    }
+
+    fun getPredictionsRowCount(date: String) = repository.getPredictionsRowCount(date)?.asLiveData()
+    fun getOddsRowCount(date: String) = repository.getOddsRowCount(date)?.asLiveData()
 
 
 }

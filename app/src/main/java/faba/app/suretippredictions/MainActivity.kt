@@ -21,20 +21,59 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            predictionsViewModel.listPredictions("2021-12-22")
 
-            predictionsViewModel.predictionListResponse.observe(this , {
-                it.forEach{ prediction ->
-                    Log.e("The pred is!! " , prediction.predictions?.winner?.comment.toString())
+            predictionsViewModel.getPredictionsRowCount("2021-12-18")?.observe(this, { pred ->
+                if (pred == 0) {
+                    predictionsViewModel.listPredictions(
+                        "2021-12-18"
+                    )
                 }
-            })
+                predictionsViewModel.getOddsRowCount("2021-12-18")?.observe(this, { odd ->
 
-            predictionsViewModel.oddsListResponse.observe(this , {
-                it.forEach{ odds ->
-                    Log.e("The odd id is!! " , odds.id.toString())
-                }
-            })
+                    Log.e(
+                        "The pred no is!! ",
+                        pred.toString()
+                    )
 
+                    Log.e(
+                        "The odd no is!! ",
+                        odd.toString()
+                    )
+
+                    if (pred == odd && pred != 0 && odd != 0) {
+                        predictionsViewModel.roomPredictionsAndOddsList("2021-12-18")
+                            .observe(this, {
+                                it.forEach { predOdds ->
+                                    Log.e(
+                                        "The pred id is!! ",
+                                        predOdds.prediction.predictions?.winner?.comment.toString()
+                                    )
+                                    Log.e("The odd id is!! ", predOdds.odds.id.toString())
+                                }
+                            })
+                    }
+                    predictionsViewModel.predCounterResponse.observe(this, { predApi ->
+                        predictionsViewModel.oddCounterResponse.observe(this, { oddApi ->
+
+                            if (pred != 0 && pred == odd && predApi == pred && oddApi == odd) {
+                                predictionsViewModel.roomPredictionsAndOddsList("2021-12-18")
+                                    .observe(this, {
+                                        it.forEach { predOdds ->
+                                            Log.e(
+                                                "The pred id is!! ",
+                                                predOdds.prediction.predictions?.winner?.comment.toString()
+                                            )
+                                            Log.e("The odd id is!! ", predOdds.odds.id.toString())
+
+                                        }
+                                    })
+                            }
+                        })
+
+                    })
+
+                })
+            })
 
         }
     }
