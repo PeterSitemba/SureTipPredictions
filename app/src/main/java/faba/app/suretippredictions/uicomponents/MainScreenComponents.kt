@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,21 +23,23 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import faba.app.suretippredictions.R
+import faba.app.suretippredictions.database.PredictionAndOdds
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 
 
-/*@Composable
-fun PredictionsScreen(events: List<MatchEvents>) {
+@ExperimentalCoilApi
+@Composable
+fun PredictionsScreen(predictionAndOdds: List<PredictionAndOdds>) {
 
     LazyColumn() {
-        items(events) { event ->
-            //PredictionListItemDark(event.matchEvents)
+        items(predictionAndOdds) { predictionAndOdds ->
+            PredictionListItemDark(predictionAndOdds)
         }
     }
 
-}*/
+}
 
-@Composable
+/*@Composable
 fun PredictionListItem() {
 
     Surface {
@@ -191,18 +194,18 @@ fun PredictionListItem() {
     }
 
 
-}
+}*/
 
 
 //To be removed, look at theming on android code labs
-/*@ExperimentalCoilApi
+@ExperimentalCoilApi
 @Composable
-fun PredictionListItemDark(event: Events) {
+fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
 
-    Surface(color = Color.DarkGray) {
+    Surface(color = colorResource(R.color.dark_mode)) {
 
         Card(
-            backgroundColor = Color.Black,
+            backgroundColor = colorResource(R.color.card_bg),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(15.dp)
@@ -226,7 +229,7 @@ fun PredictionListItemDark(event: Events) {
                         )
 
                         Text(
-                            text = "${event.match_date} ${event.match_time}",
+                            text = predictionAndOdds.prediction.date.toString(),
                             textAlign = TextAlign.Center,
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
@@ -252,7 +255,7 @@ fun PredictionListItemDark(event: Events) {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Image(
-                            painter = rememberImagePainter(event.team_home_badge),
+                            painter = rememberImagePainter(predictionAndOdds.prediction.homeLogo),
                             contentDescription = "team_one",
                             modifier = Modifier
                                 .size(width = 47.dp, height = 47.dp)
@@ -261,7 +264,7 @@ fun PredictionListItemDark(event: Events) {
                         )
 
                         Text(
-                            text = event.match_hometeam_name,
+                            text = predictionAndOdds.prediction.homeName.toString(),
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp,
                             color = Color.White,
@@ -275,7 +278,7 @@ fun PredictionListItemDark(event: Events) {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Text(
-                            text = "${event.match_hometeam_ft_score} - ${event.match_awayteam_ft_score}",
+                            text = "${predictionAndOdds.prediction.goals?.home} - ${predictionAndOdds.prediction.goals?.away}",
                             textAlign = TextAlign.Center,
                             fontSize = 25.sp,
                             maxLines = 2,
@@ -287,7 +290,7 @@ fun PredictionListItemDark(event: Events) {
                         )
 
                         Surface(
-                            color = Color.Green,
+                            color = colorResource(R.color.dark_green),
                             shape = RoundedCornerShape(6.dp),
                             modifier = Modifier
                                 .padding(top = 20.dp)
@@ -322,7 +325,7 @@ fun PredictionListItemDark(event: Events) {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Image(
-                            painter = rememberImagePainter(event.team_away_badge),
+                            painter = rememberImagePainter(predictionAndOdds.prediction.awayLogo),
                             contentDescription = "team_one",
                             modifier = Modifier
                                 .size(width = 47.dp, height = 47.dp)
@@ -331,7 +334,7 @@ fun PredictionListItemDark(event: Events) {
                         )
 
                         Text(
-                            text = event.match_awayteam_name,
+                            text = predictionAndOdds.prediction.awayName.toString(),
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp,
                             color = Color.White,
@@ -354,7 +357,7 @@ fun PredictionListItemDark(event: Events) {
     }
 
 
-}*/
+}
 
 /*fun PredictionListItemTwo() {
 

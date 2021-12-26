@@ -15,7 +15,7 @@ interface PredictionsDao {
     fun getAllPredictionsByDate(date: String): Flow<List<Prediction>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertPrediction(prediction: Prediction)
+    suspend fun insertPrediction(prediction: Iterable<Prediction>)
 
     @Query("DELETE FROM predictions_table")
     suspend fun deleteAllPredictions()
@@ -26,29 +26,35 @@ interface PredictionsDao {
     fun getAllOddsByDate(date: String): Flow<List<Odds>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertOdds(odds: Odds)
+    suspend fun insertOdds(odds: Iterable<Odds>)
 
     @Query("DELETE FROM odds_table")
     suspend fun deleteAllPOdds()
 
     //both
     @Transaction
-    @Query("SELECT id,status, goals, predictions,homeName,homeLogo,awayName,awayLogo FROM predictions_table WHERE date = :date")
+    @Query("SELECT id,date, status, goals, predictions,homeName,homeLogo,awayName,awayLogo FROM predictions_table WHERE date = :date")
     fun getAllPredictionsAndOddsByDate(date: String): Flow<List<PredictionAndOdds>>
 
     fun getAllPredictionsDistinct(date: String) = getAllPredictionsAndOddsByDate(date).distinctUntilChanged()
 
 
+
+    //pred count
     @Query("SELECT COUNT(id) FROM predictions_table WHERE date = :date")
     fun getRowCountPredTable(date: String): Flow<Int?>?
 
+
+    //odd count
     @Query("SELECT COUNT(id) FROM odds_table WHERE date = :date")
     fun getRowCountOddsTable(date: String): Flow<Int?>?
 
+    //distinct
     fun getRowCountPredTableDistinct(date: String) = getRowCountPredTable(date)?.distinctUntilChanged()
     fun getRowCountOddsTableDistinct(date: String) = getRowCountOddsTable(date)?.distinctUntilChanged()
 
 
+    //update query
     @Update(entity = Prediction::class)
     suspend fun updatePrediction(predictionUpdate: PredictionUpdate)
 }

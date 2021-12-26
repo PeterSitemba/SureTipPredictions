@@ -42,13 +42,13 @@ class PredictionsRepository @Inject constructor(
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    suspend fun insertPrediction(prediction: Prediction) {
+    suspend fun insertPrediction(prediction: Iterable<Prediction>) {
         predictionsDao.insertPrediction(prediction)
     }
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    suspend fun insertOdds(odds: Odds) {
+    suspend fun insertOdds(odds: Iterable<Odds>) {
         predictionsDao.insertOdds(odds)
     }
 

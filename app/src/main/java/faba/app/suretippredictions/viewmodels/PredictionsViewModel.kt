@@ -159,10 +159,11 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                 }
 
 
-                oddsList.forEach {
+                oddsList.let {
                     repository.insertOdds(it)
                 }
-                predictionList.forEach {
+
+                predictionList.let {
                     repository.insertPrediction(it)
                 }
 
