@@ -2,6 +2,7 @@ package faba.app.suretippredictions.database
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Dao
 interface PredictionsDao {
@@ -32,12 +33,22 @@ interface PredictionsDao {
 
     //both
     @Transaction
-    @Query("SELECT id,predictions FROM predictions_table WHERE date = :date")
+    @Query("SELECT id,status, goals, predictions,homeName,homeLogo,awayName,awayLogo FROM predictions_table WHERE date = :date")
     fun getAllPredictionsAndOddsByDate(date: String): Flow<List<PredictionAndOdds>>
+
+    fun getAllPredictionsDistinct(date: String) = getAllPredictionsAndOddsByDate(date).distinctUntilChanged()
+
 
     @Query("SELECT COUNT(id) FROM predictions_table WHERE date = :date")
     fun getRowCountPredTable(date: String): Flow<Int?>?
 
     @Query("SELECT COUNT(id) FROM odds_table WHERE date = :date")
     fun getRowCountOddsTable(date: String): Flow<Int?>?
+
+    fun getRowCountPredTableDistinct(date: String) = getRowCountPredTable(date)?.distinctUntilChanged()
+    fun getRowCountOddsTableDistinct(date: String) = getRowCountOddsTable(date)?.distinctUntilChanged()
+
+
+    @Update(entity = Prediction::class)
+    suspend fun updatePrediction(predictionUpdate: PredictionUpdate)
 }

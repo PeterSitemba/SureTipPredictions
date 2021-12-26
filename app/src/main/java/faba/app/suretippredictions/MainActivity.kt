@@ -7,9 +7,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.NonCancellable.isActive
 
 
 @AndroidEntryPoint
@@ -22,52 +25,30 @@ class MainActivity : ComponentActivity() {
         setContent {
 
 
-            predictionsViewModel.getPredictionsRowCount("2021-12-18")?.observe(this, { pred ->
+            predictionsViewModel.getPredictionsRowCount("2021-12-25")?.observe(this, { pred ->
                 if (pred == 0) {
                     predictionsViewModel.listPredictions(
-                        "2021-12-18"
+                        "2021-12-25"
                     )
                 }
-                predictionsViewModel.getOddsRowCount("2021-12-18")?.observe(this, { odd ->
-
-                    Log.e(
-                        "The pred no is!! ",
-                        pred.toString()
-                    )
-
-                    Log.e(
-                        "The odd no is!! ",
-                        odd.toString()
-                    )
+                predictionsViewModel.getOddsRowCount("2021-12-25")?.observe(this, { odd ->
 
                     if (pred == odd && pred != 0 && odd != 0) {
-                        predictionsViewModel.roomPredictionsAndOddsList("2021-12-18")
+                        predictionsViewModel.roomPredictionsAndOddsList("2021-12-25")
                             .observe(this, {
                                 it.forEach { predOdds ->
-                                    Log.e(
-                                        "The pred id is!! ",
-                                        predOdds.prediction.predictions?.winner?.comment.toString()
-                                    )
-                                    Log.e("The odd id is!! ", predOdds.odds.id.toString())
+
                                 }
                             })
+                    } else {
+                        predictionsViewModel.listPredictions(
+                            "2021-12-25"
+                        )
                     }
                     predictionsViewModel.predCounterResponse.observe(this, { predApi ->
                         predictionsViewModel.oddCounterResponse.observe(this, { oddApi ->
 
-                            if (pred != 0 && pred == odd && predApi == pred && oddApi == odd) {
-                                predictionsViewModel.roomPredictionsAndOddsList("2021-12-18")
-                                    .observe(this, {
-                                        it.forEach { predOdds ->
-                                            Log.e(
-                                                "The pred id is!! ",
-                                                predOdds.prediction.predictions?.winner?.comment.toString()
-                                            )
-                                            Log.e("The odd id is!! ", predOdds.odds.id.toString())
 
-                                        }
-                                    })
-                            }
                         })
 
                     })
@@ -75,8 +56,23 @@ class MainActivity : ComponentActivity() {
                 })
             })
 
+            //updatePredictions()
+
+
         }
     }
+
+    private fun updatePredictions(): Job {
+        return lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                while (true) {
+                    predictionsViewModel.updatePrediction("2021-12-25")
+                    delay(30000)
+                }
+            }
+        }
+    }
+
 }
 
 

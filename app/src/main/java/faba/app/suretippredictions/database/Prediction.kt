@@ -1,16 +1,19 @@
 package faba.app.suretippredictions.database
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
+import androidx.room.*
+import faba.app.suretippredictions.models.fixtures.Goals
 import faba.app.suretippredictions.models.predictions.*
 
 @Entity(tableName = "predictions_table")
 data class Prediction(
     @PrimaryKey val id: Int,
     val date: String?,
+    @ColumnInfo(name = "status")
     @TypeConverters(Converter::class) val status: Status?,
+    @ColumnInfo(name = "score")
     @TypeConverters(Converter::class) val score: Score?,
+    @ColumnInfo(name = "goals")
+    @TypeConverters(Converter::class) val goals: Goals?,
     @TypeConverters(Converter::class) val predictions: Predictions?,
     @TypeConverters(Converter::class) val league: League?,
     val homeId: Int?,
@@ -43,4 +46,14 @@ data class Prediction(
     @TypeConverters(Converter::class) val awayPenalty: Penalty?,
     @TypeConverters(Converter::class) val comparison: Comparison?,
     @TypeConverters(Converter::class) val h2h: MutableList<FixturesH2H>?
+)
+
+data class PredictionUpdate(
+    val id: Int,
+    @ColumnInfo(name = "status")
+    @TypeConverters(Converter::class) val status: Status?,
+    @ColumnInfo(name = "score")
+    @TypeConverters(Converter::class) val score: Score?,
+    @ColumnInfo(name = "goals")
+    @TypeConverters(Converter::class) val goals: Goals?
 )

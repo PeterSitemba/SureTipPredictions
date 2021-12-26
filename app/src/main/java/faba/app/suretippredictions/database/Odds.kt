@@ -8,7 +8,8 @@ import faba.app.suretippredictions.models.odds.Fixture
 
 @Entity(tableName = "odds_table")
 data class Odds(
-    @PrimaryKey val id: Int,
+    @PrimaryKey
+    val id: Int,
     val date: String,
     @TypeConverters(Converter::class) val fixture: Fixture?,
     @TypeConverters(Converter::class) val bookmakers: List<Bookmaker>

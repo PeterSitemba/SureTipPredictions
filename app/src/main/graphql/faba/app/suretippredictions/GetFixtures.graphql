@@ -1,0 +1,12 @@
+query GetFixtures($date: String!, $nextToken: String!) {
+    listFixtures(fixtureDate: $date, nextToken: $nextToken) {
+        items {
+            id
+            fixtureDate
+            goals
+            status
+            score
+        }
+        nextToken
+    }
+}
