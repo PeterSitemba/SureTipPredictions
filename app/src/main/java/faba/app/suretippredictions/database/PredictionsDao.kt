@@ -56,5 +56,5 @@ interface PredictionsDao {
 
     //update query
     @Update(entity = Prediction::class)
-    suspend fun updatePrediction(predictionUpdate: PredictionUpdate)
+    suspend fun updatePrediction(predictionUpdate: Iterable<PredictionUpdate>)
 }

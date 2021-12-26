@@ -186,6 +186,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     }
 
     fun updatePrediction(date: String) {
+        val predictionUpdateList = mutableListOf<PredictionUpdate>()
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 var response = repository.getFixtures(date, "")
@@ -211,11 +212,10 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                 )
                             )
 
-                            withContext(Dispatchers.IO) {
-                                repository.updatePrediction(predictionUpdate)
-                                //Log.e("The pred goal upd is!! ", predictionUpdate.toString())
-
+                            if (!predictionUpdateList.any { predictionUpdateItem -> predictionUpdateItem.id == it.id() }) {
+                                predictionUpdateList.add(predictionUpdate)
                             }
+
 
                         }
 
@@ -232,6 +232,10 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                 }
 
+
+                predictionUpdateList.let {
+                    repository.updatePrediction(it)
+                }
 
             } catch (e: ApiException) {
                 //progressListener?.onFailure(e.message!!)

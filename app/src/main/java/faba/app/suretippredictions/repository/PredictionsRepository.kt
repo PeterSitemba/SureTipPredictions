@@ -54,7 +54,7 @@ class PredictionsRepository @Inject constructor(
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    suspend fun updatePrediction(predictionUpdate: PredictionUpdate) {
+    suspend fun updatePrediction(predictionUpdate: Iterable<PredictionUpdate>) {
         predictionsDao.updatePrediction(predictionUpdate)
     }
 
