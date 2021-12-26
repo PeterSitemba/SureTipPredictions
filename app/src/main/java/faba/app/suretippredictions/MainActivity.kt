@@ -14,12 +14,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
-import faba.app.suretippredictions.database.PredictionAndOdds
+import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.uicomponents.PredictionsScreen
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.NonCancellable.isActive
 
 
 @AndroidEntryPoint
@@ -37,10 +36,10 @@ class MainActivity : ComponentActivity() {
             )
 
             SureTipPredictionsTheme(true) {
-                PredictionActivityScreen(predictionsViewModel, "2021-12-25")
+                PredictionActivityScreen(predictionsViewModel, "2021-12-04")
             }
 
-            initPredictionData("2021-12-25")
+            initPredictionData("2021-12-04")
 
             updatePredictions()
 
@@ -48,36 +47,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initPredictionData(date : String){
+    private fun initPredictionData(date: String) {
 
         //get pred number from server and use it to update local db if number is less than db
 
         predictionsViewModel.getPredictionsRowCount(date)?.observe(this, { pred ->
             if (pred == 0) {
-                predictionsViewModel.listPredictions(
-                    date
-                )
+                predictionsViewModel.listPredictions(date)
+                predictionsViewModel.updatePredictionOdds(date)
             }
-            predictionsViewModel.getOddsRowCount(date)?.observe(this, { odd ->
-
-              /*  if (pred == odd && pred != 0 && odd != 0) {
-                    predictionsViewModel.roomPredictionsAndOddsList(date)
-                        .observe(this, {
-                            it.forEach { predOdds ->
-
-                            }
-                        })
-                }*/
-/*
-                predictionsViewModel.predCounterResponse.observe(this, { predApi ->
-                    predictionsViewModel.oddCounterResponse.observe(this, { oddApi ->
-
-                    })
-
-                })
-*/
-
-            })
         })
 
     }
@@ -85,11 +63,11 @@ class MainActivity : ComponentActivity() {
     private fun updatePredictions(): Job {
         return lifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                predictionsViewModel.updatePrediction("2021-12-25")
-               /* while (true) {
-                    predictionsViewModel.updatePrediction("2021-12-25")
-                    delay(30000)
-                }*/
+                //predictionsViewModel.updatePrediction("2021-12-04")
+                 while (true) {
+                     predictionsViewModel.updatePrediction("2021-12-04")
+                     delay(30000)
+                 }
             }
         }
     }
@@ -99,7 +77,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PredictionActivityScreen(predictionsViewModel: PredictionsViewModel, date: String) {
 
-    val predictionItems: List<PredictionAndOdds> by predictionsViewModel.roomPredictionsAndOddsList(date)
+    val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
         .observeAsState(listOf())
 
     if (predictionItems.isEmpty()) {

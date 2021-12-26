@@ -9,9 +9,8 @@ import faba.app.core.NoInternetException
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.models.odds.Bookmaker
 import faba.app.suretippredictions.models.odds.Fixture
-import faba.app.suretippredictions.database.Odds
-import faba.app.suretippredictions.database.PredictionAndOdds
 import faba.app.suretippredictions.database.PredictionUpdate
+import faba.app.suretippredictions.database.PredictionUpdateOdds
 import faba.app.suretippredictions.models.fixtures.Goals
 import faba.app.suretippredictions.models.predictions.*
 import faba.app.suretippredictions.repository.PredictionsRepository
@@ -25,7 +24,6 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     private val gson = Gson()
 
     val predictionListResponse = MutableLiveData<MutableList<Prediction>>()
-    val oddsListResponse = MutableLiveData<MutableList<Odds>>()
 
     var predCounter = 0
     var oddCounter = 0
@@ -36,11 +34,10 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
     fun listPredictions(date: String) {
         val predictionList = mutableListOf<Prediction>()
-        val oddsList = mutableListOf<Odds>()
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    var response = repository.listPredictions(date, "", "")
+                    var response = repository.listPredictions(date, "")
 
                     while (true) {
 
@@ -87,6 +84,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                     null,
                                     null,
                                     null,
+                                    null,
                                     null
 
                                 )
@@ -98,56 +96,14 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                             }
 
-
-                            //add paging here as well
-
-                            data.listOdds()?.items()?.forEach {
-                                val odds = Odds(
-                                    it.id(),
-                                    it.oddDate(),
-                                    gson.fromJson(it.fixture() as String?, Fixture::class.java),
-                                    gson.fromJson(
-                                        it.bookmaker() as String?,
-                                        Array<Bookmaker>::class.java
-                                    )
-                                        .toList()
-                                )
-
-                                if (!oddsList.any { odd -> odd.id == it.id() }) {
-                                    oddsList.add(odds)
-                                }
-                                oddCounter++
-                            }
-
                         }
 
-                        if (response.listPredictions()?.nextToken() == null && response.listOdds()
-                                ?.nextToken() == null
-                        ) break
-
-                        if (response.listPredictions()?.nextToken() == null && response.listOdds()
-                                ?.nextToken() != null
-                        ) {
-                            response = repository.listPredictions(
-                                date,
-                                "",
-                                response.listOdds()?.nextToken()!!
-                            )
-
-                        } else if (response.listPredictions()
-                                ?.nextToken() != null && response.listOdds()?.nextToken() == null
-                        ) {
-                            response = repository.listPredictions(
-                                date,
-                                response.listPredictions()?.nextToken()!!,
-                                ""
-                            )
-
+                        if (response.listPredictions()?.nextToken() == null) {
+                            break
                         } else {
                             response = repository.listPredictions(
                                 date,
                                 response.listPredictions()?.nextToken()!!,
-                                response.listOdds()?.nextToken()!!
                             )
 
                         }
@@ -158,25 +114,16 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                 }
 
-
-                oddsList.let {
-                    repository.insertOdds(it)
-                }
-
                 predictionList.let {
                     repository.insertPrediction(it)
                 }
 
 
-
-
-                withContext(Dispatchers.Main) {
+               /* withContext(Dispatchers.Main) {
                     predCounterResponse.value = predCounter
                     oddCounterResponse.value = oddCounter
-                    //Log.e("Pred Counter ", predCounter.toString())
-                    //Log.e("Odds Counter ", oddCounter.toString())
                 }
-
+*/
             } catch (e: ApiException) {
                 //progressListener?.onFailure(e.message!!)
             } catch (e: NoInternetException) {
@@ -245,21 +192,64 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
         }
     }
 
+    fun updatePredictionOdds(date: String) {
+        val predictionUpdateOddsList = mutableListOf<PredictionUpdateOdds>()
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                var response = repository.listOdds(date, "")
 
-    fun roomPredictionsAndOddsList(date: String): LiveData<List<PredictionAndOdds>> {
-        return repository.roomPredictionsAndOddsList(date).asLiveData()
+                while (true) {
+
+                    response.let { data ->
+                        data.listOdds()?.items()?.forEach {
+
+                            val predictionUpdateOdds = PredictionUpdateOdds(
+                                it.id(),
+                                gson.fromJson(
+                                    it.bookmaker() as String?,
+                                    Array<Bookmaker>::class.java
+                                ).toMutableList()
+
+                            )
+
+                            if (!predictionUpdateOddsList.any { predictionUpdateOddsItem -> predictionUpdateOddsItem.id == it.id() }) {
+                                predictionUpdateOddsList.add(predictionUpdateOdds)
+                            }
+
+
+                        }
+
+                    }
+
+                    if (response.listOdds()?.nextToken() == null) {
+                        break
+                    } else {
+                        response = repository.listOdds(
+                            date,
+                            response.listOdds()?.nextToken()!!
+                        )
+                    }
+
+                }
+
+                predictionUpdateOddsList.let {
+                    repository.updatePredictionOdds(it)
+                }
+
+            } catch (e: ApiException) {
+                //progressListener?.onFailure(e.message!!)
+            } catch (e: NoInternetException) {
+                //progressListener?.onFailure(e.message!!)
+            }
+        }
     }
+
 
     fun roomPredictionsList(date: String): LiveData<List<Prediction>> {
         return repository.roomPredictionsList(date).asLiveData()
     }
 
-    fun roomOddsList(date: String): LiveData<List<Odds>> {
-        return repository.roomOddsList(date).asLiveData()
-    }
-
     fun getPredictionsRowCount(date: String) = repository.getPredictionsRowCount(date)?.asLiveData()
-    fun getOddsRowCount(date: String) = repository.getOddsRowCount(date)?.asLiveData()
 
 
 }

@@ -1,0 +1,10 @@
+query ListOdds($date: String!, $nextToken: String!) {
+ listOdds(oddDate: $date, nextToken: $nextToken) {
+        items {
+            bookmaker
+            id
+        }
+        nextToken
+    }
+
+}

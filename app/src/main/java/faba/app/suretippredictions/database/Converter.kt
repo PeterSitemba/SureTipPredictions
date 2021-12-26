@@ -203,14 +203,14 @@ class Converter {
     }
 
     @TypeConverter
-    fun toBookmaker(json: String?): List<Bookmaker>? {
-        val type = object : TypeToken<List<Bookmaker>>() {}.type
+    fun toBookmaker(json: String?): MutableList<Bookmaker>? {
+        val type = object : TypeToken<MutableList<Bookmaker>>() {}.type
         return Gson().fromJson(json, type)
     }
 
     @TypeConverter
-    fun toJsonBookmaker(bookmaker: List<Bookmaker>?): String {
-        val type = object : TypeToken<List<Bookmaker>>() {}.type
+    fun toJsonBookmaker(bookmaker: MutableList<Bookmaker>?): String {
+        val type = object : TypeToken<MutableList<Bookmaker>>() {}.type
         return Gson().toJson(bookmaker, type)
     }
 

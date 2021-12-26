@@ -3,11 +3,9 @@ package faba.app.suretippredictions.repository
 import androidx.annotation.WorkerThread
 import com.apollographql.apollo.coroutines.await
 import faba.app.suretippredictions.GetFixturesQuery
+import faba.app.suretippredictions.ListOddsQuery
 import faba.app.suretippredictions.ListPredictionsQuery
-import faba.app.suretippredictions.database.Odds
-import faba.app.suretippredictions.database.Prediction
-import faba.app.suretippredictions.database.PredictionUpdate
-import faba.app.suretippredictions.database.PredictionsDao
+import faba.app.suretippredictions.database.*
 import faba.app.suretippredictions.service.Apollo
 import faba.app.suretippredictions.service.SafeGuardApiRequest
 import kotlinx.coroutines.flow.Flow
@@ -18,9 +16,15 @@ class PredictionsRepository @Inject constructor(
     private val predictionsDao: PredictionsDao
 ) : SafeGuardApiRequest(){
 
-    suspend fun listPredictions(date: String, nextTokenPred: String, nextTokenOdd: String): ListPredictionsQuery.Data {
+    suspend fun listPredictions(date: String, nextToken: String): ListPredictionsQuery.Data {
         return apiRequest {
-            api.getApolloClient().query(ListPredictionsQuery(date, nextTokenPred, nextTokenOdd)).await()
+            api.getApolloClient().query(ListPredictionsQuery(date, nextToken)).await()
+        }
+    }
+
+    suspend fun listOdds(date: String, nextToken: String): ListOddsQuery.Data {
+        return apiRequest {
+            api.getApolloClient().query(ListOddsQuery(date, nextToken)).await()
         }
     }
 
@@ -31,13 +35,8 @@ class PredictionsRepository @Inject constructor(
     }
 
 
-    fun roomPredictionsList(date: String) = predictionsDao.getAllPredictionsByDate(date)
-    fun roomOddsList(date: String) = predictionsDao.getAllOddsByDate(date)
-
-    fun roomPredictionsAndOddsList(date: String) = predictionsDao.getAllPredictionsDistinct(date)
-
+    fun roomPredictionsList(date: String) = predictionsDao.getAllPredictionsDistinct(date)
     fun getPredictionsRowCount(date: String) = predictionsDao.getRowCountPredTableDistinct(date)
-    fun getOddsRowCount(date: String) = predictionsDao.getRowCountOddsTableDistinct(date)
 
 
     @Suppress("RedundantSuspendModifier")
@@ -48,16 +47,15 @@ class PredictionsRepository @Inject constructor(
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    suspend fun insertOdds(odds: Iterable<Odds>) {
-        predictionsDao.insertOdds(odds)
-    }
-
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
     suspend fun updatePrediction(predictionUpdate: Iterable<PredictionUpdate>) {
         predictionsDao.updatePrediction(predictionUpdate)
     }
 
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    suspend fun updatePredictionOdds(predictionUpdateOdds: Iterable<PredictionUpdateOdds>) {
+        predictionsDao.updatePredictionOdds(predictionUpdateOdds)
+    }
 
 
 

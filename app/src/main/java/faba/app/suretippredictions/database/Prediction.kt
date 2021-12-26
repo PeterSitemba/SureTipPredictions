@@ -2,6 +2,8 @@ package faba.app.suretippredictions.database
 
 import androidx.room.*
 import faba.app.suretippredictions.models.fixtures.Goals
+import faba.app.suretippredictions.models.odds.Bookmaker
+import faba.app.suretippredictions.models.odds.Fixture
 import faba.app.suretippredictions.models.predictions.*
 
 @Entity(tableName = "predictions_table")
@@ -45,7 +47,8 @@ data class Prediction(
     @TypeConverters(Converter::class) val awayFailedToScore: FailedToScore?,
     @TypeConverters(Converter::class) val awayPenalty: Penalty?,
     @TypeConverters(Converter::class) val comparison: Comparison?,
-    @TypeConverters(Converter::class) val h2h: MutableList<FixturesH2H>?
+    @TypeConverters(Converter::class) val h2h: MutableList<FixturesH2H>?,
+    @TypeConverters(Converter::class) val odds: MutableList<Bookmaker>?,
 )
 
 data class PredictionUpdate(
@@ -56,4 +59,9 @@ data class PredictionUpdate(
     @TypeConverters(Converter::class) val score: Score?,
     @ColumnInfo(name = "goals")
     @TypeConverters(Converter::class) val goals: Goals?
+)
+
+data class PredictionUpdateOdds(
+    val id: Int,
+    @TypeConverters(Converter::class) val odds: MutableList<Bookmaker>?
 )

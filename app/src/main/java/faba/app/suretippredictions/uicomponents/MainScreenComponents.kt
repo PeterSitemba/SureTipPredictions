@@ -23,17 +23,17 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import faba.app.suretippredictions.R
-import faba.app.suretippredictions.database.PredictionAndOdds
+import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 
 
 @ExperimentalCoilApi
 @Composable
-fun PredictionsScreen(predictionAndOdds: List<PredictionAndOdds>) {
+fun PredictionsScreen(prediction: List<Prediction>) {
 
     LazyColumn() {
-        items(predictionAndOdds) { predictionAndOdds ->
-            PredictionListItemDark(predictionAndOdds)
+        items(prediction) { prediction ->
+            PredictionListItemDark(prediction)
         }
     }
 
@@ -200,7 +200,7 @@ fun PredictionListItem() {
 //To be removed, look at theming on android code labs
 @ExperimentalCoilApi
 @Composable
-fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
+fun PredictionListItemDark(prediction: Prediction) {
 
     Surface(color = colorResource(R.color.dark_mode)) {
 
@@ -229,7 +229,7 @@ fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
                         )
 
                         Text(
-                            text = predictionAndOdds.prediction.date.toString(),
+                            text = prediction.date.toString(),
                             textAlign = TextAlign.Center,
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
@@ -255,7 +255,7 @@ fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Image(
-                            painter = rememberImagePainter(predictionAndOdds.prediction.homeLogo),
+                            painter = rememberImagePainter(prediction.homeLogo),
                             contentDescription = "team_one",
                             modifier = Modifier
                                 .size(width = 47.dp, height = 47.dp)
@@ -264,7 +264,7 @@ fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
                         )
 
                         Text(
-                            text = predictionAndOdds.prediction.homeName.toString(),
+                            text = prediction.homeName.toString(),
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp,
                             color = Color.White,
@@ -278,7 +278,7 @@ fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Text(
-                            text = "${predictionAndOdds.prediction.goals?.home} - ${predictionAndOdds.prediction.goals?.away}",
+                            text = "${prediction.goals?.home} - ${prediction.goals?.away}",
                             textAlign = TextAlign.Center,
                             fontSize = 25.sp,
                             maxLines = 2,
@@ -325,7 +325,7 @@ fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
                         modifier = Modifier.width(100.dp)
                     ) {
                         Image(
-                            painter = rememberImagePainter(predictionAndOdds.prediction.awayLogo),
+                            painter = rememberImagePainter(prediction.awayLogo),
                             contentDescription = "team_one",
                             modifier = Modifier
                                 .size(width = 47.dp, height = 47.dp)
@@ -334,7 +334,7 @@ fun PredictionListItemDark(predictionAndOdds: PredictionAndOdds) {
                         )
 
                         Text(
-                            text = predictionAndOdds.prediction.awayName.toString(),
+                            text = prediction.awayName.toString(),
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp,
                             color = Color.White,

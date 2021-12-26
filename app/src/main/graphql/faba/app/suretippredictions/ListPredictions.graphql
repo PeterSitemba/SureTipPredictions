@@ -1,5 +1,5 @@
-query ListPredictions($date: String!, $nextTokenPred: String!, $nextTokenOdd: String!) {
-    listPredictions(predictionDate: $date, nextToken: $nextTokenPred) {
+query ListPredictions($date: String!, $nextToken: String!) {
+    listPredictions(predictionDate: $date, nextToken: $nextToken) {
         items {
             id
             homeLogo
@@ -9,16 +9,6 @@ query ListPredictions($date: String!, $nextTokenPred: String!, $nextTokenOdd: St
             predictions
             predictionDate
             gameTime
-        }
-        nextToken
-    }
-
-    listOdds(oddDate: $date, nextToken: $nextTokenOdd) {
-        items {
-            bookmaker
-            fixture
-            id
-            oddDate
         }
         nextToken
     }
