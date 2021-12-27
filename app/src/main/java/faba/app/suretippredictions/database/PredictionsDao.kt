@@ -12,7 +12,7 @@ interface PredictionsDao {
     suspend fun insertPrediction(prediction: Iterable<Prediction>)
 
     @Transaction
-    @Query("SELECT id,date, status, goals, predictions,homeName,homeLogo,awayName,awayLogo,odds FROM predictions_table WHERE date = :date")
+    @Query("SELECT id,date, status, goals, predictions,homeName,homeLogo,awayName,awayLogo,odds,league FROM predictions_table WHERE date = :date")
     fun getAllPredictionsByDate(date: String): Flow<List<Prediction>>
 
     fun getAllPredictionsDistinct(date: String) = getAllPredictionsByDate(date).distinctUntilChanged()

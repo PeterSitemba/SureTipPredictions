@@ -9,6 +9,7 @@ query ListPredictions($date: String!, $nextToken: String!) {
             predictions
             predictionDate
             gameTime
+            league
         }
         nextToken
     }

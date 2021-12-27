@@ -83,8 +83,13 @@ fun PredictionActivityScreen(predictionsViewModel: PredictionsViewModel, date: S
     if (predictionItems.isEmpty()) {
         CircularProgressIndicator()
     } else {
+
+        val leagues: List<Int> = arrayListOf(39,71, 173,421,847,432,59,441, 149,430)
+
         SureTipPredictionsTheme(true) {
-            PredictionsScreen(predictionItems)
+            PredictionsScreen(predictionItems.filter { it.league?.id in leagues })
+            //PredictionsScreen(predictionItems)
+
         }
     }
 

@@ -54,7 +54,10 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                         it.predictions() as String?,
                                         Predictions::class.java
                                     ),
-                                    null,
+                                    gson.fromJson(
+                                        it.league() as String?,
+                                        League::class.java
+                                    ),
                                     null,
                                     it.homeName(),
                                     it.homeLogo(),
@@ -89,6 +92,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                                 )
 
+
                                 if (!predictionList.any { prediction -> prediction.id == it.id() }) {
                                     predictionList.add(prediction)
                                 }
@@ -119,11 +123,11 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                 }
 
 
-               /* withContext(Dispatchers.Main) {
-                    predCounterResponse.value = predCounter
-                    oddCounterResponse.value = oddCounter
-                }
-*/
+                /* withContext(Dispatchers.Main) {
+                     predCounterResponse.value = predCounter
+                     oddCounterResponse.value = oddCounter
+                 }
+ */
             } catch (e: ApiException) {
                 //progressListener?.onFailure(e.message!!)
             } catch (e: NoInternetException) {
