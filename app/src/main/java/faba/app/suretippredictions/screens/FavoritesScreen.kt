@@ -11,9 +11,10 @@ import faba.app.suretippredictions.database.Prediction
 
 @ExperimentalCoilApi
 @Composable
-fun FavoritesScreen(prediction: List<Prediction>, onSetAppTitle: (String) -> Unit) {
+fun FavoritesScreen(prediction: List<Prediction>, onSetAppTitle: (String) -> Unit, onTopAppBarIconsName: (String) -> Unit) {
 
     onSetAppTitle("Favorites")
+    onTopAppBarIconsName("Favorites")
 
     LazyColumn(modifier = Modifier.padding(bottom = 50.dp)) {
         items(prediction) { prediction ->

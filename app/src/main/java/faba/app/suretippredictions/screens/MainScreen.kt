@@ -27,11 +27,13 @@ import faba.app.suretippredictions.database.Prediction
 
 @ExperimentalCoilApi
 @Composable
-fun PredictionsScreen(prediction: List<Prediction>, onSetAppTitle: (String) -> Unit) {
+fun PredictionsScreen(prediction: List<Prediction>, onSetAppTitle: (String) -> Unit, onTopAppBarIconsName: (String) -> Unit) {
 
     onSetAppTitle("SureScore Predictions")
+    onTopAppBarIconsName("Main")
 
-    LazyColumn(modifier = Modifier.padding(bottom = 50.dp)) {
+
+    LazyColumn(modifier = Modifier.padding(bottom = 60.dp)) {
         items(prediction) { prediction ->
             PredictionListItemDark(prediction)
         }
@@ -49,7 +51,7 @@ fun PredictionListItemDark(prediction: Prediction) {
             backgroundColor = colorResource(R.color.card_bg),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(15.dp)
+                .padding(top = 10.dp, bottom = 10.dp, start = 10.dp, end = 10.dp)
                 .height(120.dp), elevation = 6.dp
         ) {
 
@@ -118,8 +120,14 @@ fun PredictionListItemDark(prediction: Prediction) {
                     Column(
                         modifier = Modifier.width(100.dp)
                     ) {
+                        var goals: String = if(prediction.goals?.home == null){
+                            "VS"
+                        }else{
+                            "${prediction.goals?.home} - ${prediction.goals?.away}"
+                        }
+
                         Text(
-                            text = "${prediction.goals?.home} - ${prediction.goals?.away}",
+                            text = goals,
                             textAlign = TextAlign.Center,
                             fontSize = 25.sp,
                             maxLines = 2,

@@ -11,9 +11,12 @@ import faba.app.suretippredictions.database.Prediction
 
 @ExperimentalCoilApi
 @Composable
-fun AllGamesScreen(prediction: List<Prediction>, onSetAppTitle: (String) -> Unit) {
+fun AllGamesScreen(prediction: List<Prediction>, onSetAppTitle: (String) -> Unit, onTopAppBarIconsName: (String) -> Unit) {
 
     onSetAppTitle("All Games")
+    onTopAppBarIconsName("AllGames")
+
+
 
     LazyColumn(modifier = Modifier.padding(bottom = 50.dp)) {
         items(prediction) { prediction ->

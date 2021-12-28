@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 fun SureScorePredictionsMain(predictionList: List<Prediction>, error: String) {
 
     var appTitle by remember { mutableStateOf("") }
+    var topAppBarIconsName by remember { mutableStateOf("") }
     val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
     val coroutineScope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -59,9 +60,39 @@ fun SureScorePredictionsMain(predictionList: List<Prediction>, error: String) {
             TopAppBar(
                 title = { Text(appTitle) },
                 actions = {
-                    IconButton(onClick = { /* doSomething() */ }) {
-                        Icon(Icons.Filled.Search, contentDescription = "Localized description")
+
+                    when (topAppBarIconsName) {
+                        "AllGames", "Main" -> {
+
+                            IconButton(onClick = { /* doSomething() */ }) {
+                                Icon(
+                                    Icons.Filled.Search,
+                                    contentDescription = "Localized description"
+                                )
+                            }
+
+                            IconButton(onClick = { /* doSomething() */ }) {
+                                Icon(
+                                    painterResource(id = R.drawable.outline_calendar_today_white_24),
+                                    contentDescription = "Calendar",
+                                    modifier = Modifier.size(20.dp)
+
+                                )
+                            }
+
+
+                        }
+                        "Favorites" -> {
+                            IconButton(onClick = { /* doSomething() */ }) {
+                                Icon(
+                                    Icons.Filled.Search,
+                                    contentDescription = "Localized description"
+                                )
+                            }
+                        }
                     }
+
+
                 }
             )
         },
@@ -98,7 +129,11 @@ fun SureScorePredictionsMain(predictionList: List<Prediction>, error: String) {
     ) {
 
 
-        Navigation(navController = navController, predictionList, onSetAppTitle = { appTitle = it })
+        Navigation(
+            navController = navController,
+            predictionList,
+            onSetAppTitle = { appTitle = it },
+            topAppBarIconsName = { topAppBarIconsName = it })
 
         if (error.isNotEmpty()) {
             coroutineScope.launch {
@@ -115,11 +150,34 @@ fun SureScorePredictionsMain(predictionList: List<Prediction>, error: String) {
 
 @ExperimentalCoilApi
 @Composable
-fun Navigation(navController: NavHostController, predictionList: List<Prediction>, onSetAppTitle: (String) -> Unit) {
+fun Navigation(
+    navController: NavHostController,
+    predictionList: List<Prediction>,
+    onSetAppTitle: (String) -> Unit,
+    topAppBarIconsName: (String) -> Unit
+) {
     NavHost(navController = navController, startDestination = NavigationItem.Main.route) {
-        composable(NavigationItem.AllGames.route) { AllGamesScreen(predictionList, onSetAppTitle) }
-        composable(NavigationItem.Main.route) { PredictionsScreen(predictionList.filter { it.league?.id in Constants.mainLeaguesList }, onSetAppTitle) }
-        composable(NavigationItem.Favorites.route) { FavoritesScreen(predictionList, onSetAppTitle) }
+        composable(NavigationItem.AllGames.route) {
+            AllGamesScreen(
+                predictionList,
+                onSetAppTitle,
+                topAppBarIconsName
+            )
+        }
+        composable(NavigationItem.Main.route) {
+            PredictionsScreen(
+                predictionList.filter { it.league?.id in Constants.mainLeaguesList },
+                onSetAppTitle,
+                topAppBarIconsName
+            )
+        }
+        composable(NavigationItem.Favorites.route) {
+            FavoritesScreen(
+                predictionList,
+                onSetAppTitle,
+                topAppBarIconsName
+            )
+        }
     }
 }
 
