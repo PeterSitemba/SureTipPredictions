@@ -2,6 +2,7 @@ package faba.app.suretippredictions.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.*
+import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import faba.app.core.ApiException
@@ -31,12 +32,21 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     val predCounterResponse = MutableLiveData<Int>()
     val oddCounterResponse = MutableLiveData<Int>()
 
+    val errorMessage = MutableLiveData<String>()
+    val loading = MutableLiveData<Boolean>()
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        onError("Exception handled: ${throwable.localizedMessage}")
+
+    }
+
 
     fun listPredictions(date: String) {
         val predictionList = mutableListOf<Prediction>()
         viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO + exceptionHandler) {
+                try {
+
                     var response = repository.listPredictions(date, "")
 
                     while (true) {
@@ -116,135 +126,150 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                     }
 
 
+
+                    predictionList.let {
+                        repository.insertPrediction(it)
+                    }
+
+
+                    /* withContext(Dispatchers.Main) {
+                         predCounterResponse.value = predCounter
+                         oddCounterResponse.value = oddCounter
+                     }
+     */
+                } catch (e: ApiException) {
+                    onError("Something went wrong.\nCheck your internet connection")
+                } catch (e: NoInternetException) {
+                    onError("Something went wrong.\nCheck your internet connection")
+                } catch (e: ApolloException) {
+                    onError("Something went wrong.\nCheck your internet connection")
+
                 }
-
-                predictionList.let {
-                    repository.insertPrediction(it)
-                }
-
-
-                /* withContext(Dispatchers.Main) {
-                     predCounterResponse.value = predCounter
-                     oddCounterResponse.value = oddCounter
-                 }
- */
-            } catch (e: ApiException) {
-                //progressListener?.onFailure(e.message!!)
-            } catch (e: NoInternetException) {
-                //progressListener?.onFailure(e.message!!)
             }
         }
     }
 
     fun updatePrediction(date: String) {
         val predictionUpdateList = mutableListOf<PredictionUpdate>()
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                var response = repository.getFixtures(date, "")
+        viewModelScope.launch {
+            withContext(Dispatchers.IO + exceptionHandler) {
+                try {
+                    var response = repository.getFixtures(date, "")
 
-                while (true) {
+                    while (true) {
 
-                    response.let { data ->
-                        data.listFixtures()?.items()?.forEach {
+                        response.let { data ->
+                            data.listFixtures()?.items()?.forEach {
 
-                            val predictionUpdate = PredictionUpdate(
-                                it.id(),
-                                gson.fromJson(
-                                    it.status() as String?,
-                                    Status::class.java
-                                ),
-                                gson.fromJson(
-                                    it.score() as String?,
-                                    Score::class.java
-                                ),
-                                gson.fromJson(
-                                    it.goals() as String?,
-                                    Goals::class.java
+                                val predictionUpdate = PredictionUpdate(
+                                    it.id(),
+                                    gson.fromJson(
+                                        it.status() as String?,
+                                        Status::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.score() as String?,
+                                        Score::class.java
+                                    ),
+                                    gson.fromJson(
+                                        it.goals() as String?,
+                                        Goals::class.java
+                                    )
                                 )
-                            )
 
-                            if (!predictionUpdateList.any { predictionUpdateItem -> predictionUpdateItem.id == it.id() }) {
-                                predictionUpdateList.add(predictionUpdate)
+                                if (!predictionUpdateList.any { predictionUpdateItem -> predictionUpdateItem.id == it.id() }) {
+                                    predictionUpdateList.add(predictionUpdate)
+                                }
+
+
                             }
 
+                        }
 
+                        if (response.listFixtures()?.nextToken() == null) {
+                            break
+                        } else {
+                            response = repository.getFixtures(
+                                date,
+                                response.listFixtures()?.nextToken()!!
+                            )
                         }
 
                     }
 
-                    if (response.listFixtures()?.nextToken() == null) {
-                        break
-                    } else {
-                        response = repository.getFixtures(
-                            date,
-                            response.listFixtures()?.nextToken()!!
-                        )
+
+                    predictionUpdateList.let {
+                        repository.updatePrediction(it)
                     }
 
+                }  catch (e: NoInternetException) {
+                    onError("Something went wrong.\nCheck your internet connection")
+                } catch (e: ApolloException) {
+                    onError("Something went wrong.\nCheck your internet connection")
+                }catch (e: ApiException) {
+                    onError("Something went wrong.\nCheck your internet connection")
                 }
 
-
-                predictionUpdateList.let {
-                    repository.updatePrediction(it)
-                }
-
-            } catch (e: ApiException) {
-                //progressListener?.onFailure(e.message!!)
-            } catch (e: NoInternetException) {
-                //progressListener?.onFailure(e.message!!)
             }
+
         }
     }
 
     fun updatePredictionOdds(date: String) {
         val predictionUpdateOddsList = mutableListOf<PredictionUpdateOdds>()
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                var response = repository.listOdds(date, "")
+        viewModelScope.launch {
+            withContext(Dispatchers.IO + exceptionHandler) {
+                try {
+                    var response = repository.listOdds(date, "")
 
-                while (true) {
+                    while (true) {
 
-                    response.let { data ->
-                        data.listOdds()?.items()?.forEach {
+                        response.let { data ->
+                            data.listOdds()?.items()?.forEach {
 
-                            val predictionUpdateOdds = PredictionUpdateOdds(
-                                it.id(),
-                                gson.fromJson(
-                                    it.bookmaker() as String?,
-                                    Array<Bookmaker>::class.java
-                                ).toMutableList()
+                                val predictionUpdateOdds = PredictionUpdateOdds(
+                                    it.id(),
+                                    gson.fromJson(
+                                        it.bookmaker() as String?,
+                                        Array<Bookmaker>::class.java
+                                    ).toMutableList()
 
-                            )
+                                )
 
-                            if (!predictionUpdateOddsList.any { predictionUpdateOddsItem -> predictionUpdateOddsItem.id == it.id() }) {
-                                predictionUpdateOddsList.add(predictionUpdateOdds)
+                                if (!predictionUpdateOddsList.any { predictionUpdateOddsItem -> predictionUpdateOddsItem.id == it.id() }) {
+                                    predictionUpdateOddsList.add(predictionUpdateOdds)
+                                }
+
+
                             }
 
+                        }
 
+                        if (response.listOdds()?.nextToken() == null) {
+                            break
+                        } else {
+                            response = repository.listOdds(
+                                date,
+                                response.listOdds()?.nextToken()!!
+                            )
                         }
 
                     }
 
-                    if (response.listOdds()?.nextToken() == null) {
-                        break
-                    } else {
-                        response = repository.listOdds(
-                            date,
-                            response.listOdds()?.nextToken()!!
-                        )
+                    predictionUpdateOddsList.let {
+                        repository.updatePredictionOdds(it)
                     }
 
+                } catch (e: ApiException) {
+                    onError("Something went wrong.\nCheck your internet connection")
+                } catch (e: NoInternetException) {
+                    onError("Something went wrong.\nCheck your internet connection")
+                } catch (e: ApolloException) {
+                    onError("Something went wrong.\nCheck your internet connection")
                 }
 
-                predictionUpdateOddsList.let {
-                    repository.updatePredictionOdds(it)
-                }
-
-            } catch (e: ApiException) {
-                //progressListener?.onFailure(e.message!!)
-            } catch (e: NoInternetException) {
-                //progressListener?.onFailure(e.message!!)
             }
+
         }
     }
 
@@ -254,6 +279,11 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     }
 
     fun getPredictionsRowCount(date: String) = repository.getPredictionsRowCount(date)?.asLiveData()
+
+    private fun onError(message: String) {
+        errorMessage.postValue(message)
+        loading.postValue(false)
+    }
 
 
 }

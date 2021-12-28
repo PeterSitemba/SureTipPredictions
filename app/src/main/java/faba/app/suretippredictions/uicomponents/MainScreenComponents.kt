@@ -1,43 +1,174 @@
 package faba.app.suretippredictions.uicomponents
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
+import faba.app.suretippredictions.Constants
+import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
-import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
+import faba.app.suretippredictions.screens.AllGamesScreen
+import faba.app.suretippredictions.screens.FavoritesScreen
+import faba.app.suretippredictions.screens.PredictionsScreen
+import kotlinx.coroutines.launch
 
 
 @ExperimentalCoilApi
+@ExperimentalMaterialApi
 @Composable
-fun PredictionsScreen(prediction: List<Prediction>) {
+fun SureScorePredictionsMain(predictionList: List<Prediction>, error: String) {
 
-    LazyColumn() {
-        items(prediction) { prediction ->
-            PredictionListItemDark(prediction)
+    var appTitle by remember { mutableStateOf("") }
+    val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
+    val coroutineScope = rememberCoroutineScope()
+    val navController = rememberNavController()
+    val items = listOf(
+        NavigationItem.AllGames,
+        NavigationItem.Main,
+        NavigationItem.Favorites
+    )
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(appTitle) },
+                actions = {
+                    IconButton(onClick = { /* doSomething() */ }) {
+                        Icon(Icons.Filled.Search, contentDescription = "Localized description")
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                items = items,
+                navController = navController,
+                onItemClick = {
+                    navController.navigate(it.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+
+            Divider(color = Color.DarkGray, thickness = 1.dp)
+        },
+        scaffoldState = scaffoldState,
+        snackbarHost = {
+            // reuse default SnackbarHost to have default animation and timing handling
+            SnackbarHost(it) { data ->
+                Snackbar(
+                    actionColor = colorResource(R.color.colorLightBlue),
+                    backgroundColor = colorResource(R.color.dark_mode),
+                    contentColor = Color.White,
+                    snackbarData = data
+                )
+            }
         }
+
+    ) {
+
+
+        Navigation(navController = navController, predictionList, onSetAppTitle = { appTitle = it })
+
+        if (error.isNotEmpty()) {
+            coroutineScope.launch {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = error,
+                    actionLabel = "Refresh"
+                )
+            }
+        }
+
     }
 
 }
+
+@ExperimentalCoilApi
+@Composable
+fun Navigation(navController: NavHostController, predictionList: List<Prediction>, onSetAppTitle: (String) -> Unit) {
+    NavHost(navController = navController, startDestination = NavigationItem.Main.route) {
+        composable(NavigationItem.AllGames.route) { AllGamesScreen(predictionList, onSetAppTitle) }
+        composable(NavigationItem.Main.route) { PredictionsScreen(predictionList.filter { it.league?.id in Constants.mainLeaguesList }, onSetAppTitle) }
+        composable(NavigationItem.Favorites.route) { FavoritesScreen(predictionList, onSetAppTitle) }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun BottomNavigationBar(
+    items: List<NavigationItem>,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    onItemClick: (NavigationItem) -> Unit
+) {
+    val backStackEntry = navController.currentBackStackEntryAsState()
+    BottomNavigation(
+        modifier = modifier,
+        backgroundColor = colorResource(R.color.dark_mode),
+        elevation = 20.dp
+    ) {
+        items.forEach { item ->
+            val selected = item.route == backStackEntry.value?.destination?.route
+            BottomNavigationItem(
+                selected = selected,
+                onClick = { onItemClick(item) },
+                selectedContentColor = colorResource(R.color.colorLightBlue),
+                unselectedContentColor = Color.Gray,
+                icon = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            painterResource(id = item.icon),
+                            contentDescription = item.name
+                        )
+
+                        Text(
+                            text = item.name,
+                            textAlign = TextAlign.Center,
+                            fontSize = 10.sp
+                        )
+
+/*
+                        if(selected) {
+
+                        }
+*/
+                    }
+                }
+            )
+        }
+    }
+}
+
 
 /*@Composable
 fun PredictionListItem() {
@@ -196,168 +327,6 @@ fun PredictionListItem() {
 
 }*/
 
-
-//To be removed, look at theming on android code labs
-@ExperimentalCoilApi
-@Composable
-fun PredictionListItemDark(prediction: Prediction) {
-
-    Surface(color = colorResource(R.color.dark_mode)) {
-
-        Card(
-            backgroundColor = colorResource(R.color.card_bg),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp)
-                .height(120.dp), elevation = 6.dp
-        ) {
-
-            Column {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-
-                        val (icon, text) = createRefs()
-                        Icon(
-                            painter = painterResource(id = R.drawable.outline_star_white_24),
-                            contentDescription = "fav",
-                            modifier = Modifier
-                                .size(width = 27.dp, height = 27.dp)
-                                .padding(start = 5.dp, top = 5.dp)
-                                .constrainAs(icon) {
-                                    start.linkTo(parent.start)
-                                }
-                        )
-
-                        Text(
-                            text = prediction.date.toString(),
-                            textAlign = TextAlign.Center,
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp,
-                            modifier = Modifier.constrainAs(text) {
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }
-
-                        )
-
-
-                    }
-
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-
-                    Column(
-                        modifier = Modifier.width(100.dp)
-                    ) {
-                        Image(
-                            painter = rememberImagePainter(prediction.homeLogo),
-                            contentDescription = "team_one",
-                            modifier = Modifier
-                                .size(width = 47.dp, height = 47.dp)
-                                .offset(y = (-10).dp)
-                                .align(CenterHorizontally)
-                        )
-
-                        Text(
-                            text = prediction.homeName.toString(),
-                            textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
-                            color = Color.White,
-                            maxLines = 2,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier.width(100.dp)
-                    ) {
-                        Text(
-                            text = "${prediction.goals?.home} - ${prediction.goals?.away}",
-                            textAlign = TextAlign.Center,
-                            fontSize = 25.sp,
-                            maxLines = 2,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 5.dp)
-                        )
-
-                        Surface(
-                            color = colorResource(R.color.dark_green),
-                            shape = RoundedCornerShape(6.dp),
-                            modifier = Modifier
-                                .padding(top = 20.dp)
-                                .size(width = 104.dp, height = 17.dp)
-
-                        ) {
-                            Text(
-                                text = "Home Win or Draw",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
-                            )
-
-                        }
-
-                        Text(
-                            text = "Odds : 1.32",
-                            textAlign = TextAlign.Center,
-                            fontSize = 11.sp,
-                            maxLines = 2,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
-
-                    }
-
-                    Column(
-                        modifier = Modifier.width(100.dp)
-                    ) {
-                        Image(
-                            painter = rememberImagePainter(prediction.awayLogo),
-                            contentDescription = "team_one",
-                            modifier = Modifier
-                                .size(width = 47.dp, height = 47.dp)
-                                .offset(y = (-10).dp)
-                                .align(CenterHorizontally)
-                        )
-
-                        Text(
-                            text = prediction.awayName.toString(),
-                            textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
-                            color = Color.White,
-                            maxLines = 2,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-
-                }
-
-
-            }
-
-
-        }
-
-
-    }
-
-
-}
 
 /*fun PredictionListItemTwo() {
 
