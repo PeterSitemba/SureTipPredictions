@@ -62,8 +62,6 @@ fun SureScorePredictionsMain(
                 title = { Text(appTitle) },
                 actions = {
 
-
-
                     when (topAppBarIconsName) {
                         NavigationItem.AllGames.name, NavigationItem.Main.name -> {
 

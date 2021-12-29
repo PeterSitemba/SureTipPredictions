@@ -49,6 +49,7 @@ data class Prediction(
     @TypeConverters(Converter::class) val comparison: Comparison?,
     @TypeConverters(Converter::class) val h2h: MutableList<FixturesH2H>?,
     @TypeConverters(Converter::class) val odds: MutableList<Bookmaker>?,
+    val predictionString: String?,
 )
 
 data class PredictionUpdate(

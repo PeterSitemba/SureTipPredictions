@@ -2,8 +2,10 @@ query ListPredictions($date: String!, $nextToken: String!) {
     listPredictions(predictionDate: $date, nextToken: $nextToken) {
         items {
             id
+            homeId
             homeLogo
             homeName
+            awayId
             awayLogo
             awayName
             predictions

@@ -1,5 +1,6 @@
 package faba.app.suretippredictions.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,7 +10,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,7 +45,101 @@ fun PredictionsScreen(
     } else {
         LazyColumn(modifier = Modifier.padding(bottom = 50.dp)) {
             items(prediction) { prediction ->
-                PredictionListItemDark(prediction)
+
+                var predictionOutcome by remember { mutableStateOf("") }
+                when (prediction.predictionString) {
+                    "Home Win or Draw" -> {
+
+                        if (prediction.score?.fulltime?.home == null) {
+                            predictionOutcome = "TBD"
+                        } else {
+                            when (prediction.status?.short) {
+                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                    predictionOutcome =
+                                        if (prediction.score.fulltime.home >= prediction.score.fulltime.away!!) {
+                                            "WON"
+                                        } else {
+                                            "LOST"
+                                        }
+                                }
+                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                    predictionOutcome = "TBD"
+                                }
+                            }
+                        }
+                    }
+                    "Away Win or Draw" -> {
+
+                        if (prediction.score?.fulltime?.away == null) {
+                            predictionOutcome = "TBD"
+                        } else {
+                            when (prediction.status?.short) {
+                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                    predictionOutcome =
+                                        if (prediction.score.fulltime.away >= prediction.score.fulltime.home!!) {
+                                            "WON"
+                                        } else {
+                                            "LOST"
+                                        }
+                                }
+                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                    predictionOutcome = "TBD"
+                                }
+                            }
+                        }
+                    }
+                    "Home Win" -> {
+
+                        if (prediction.score?.fulltime?.home == null) {
+                            predictionOutcome = "TBD"
+                        } else {
+                            when (prediction.status?.short) {
+                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                    predictionOutcome =
+                                        if (prediction.score.fulltime.home > prediction.score.fulltime.away!!) {
+                                            "WON"
+                                        } else {
+                                            "LOST"
+                                        }
+                                }
+                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                    predictionOutcome = "TBD"
+                                }
+                            }
+                        }
+
+                    }
+                    "Away Win" -> {
+
+                        if (prediction.score?.fulltime?.away == null) {
+                            predictionOutcome = "TBD"
+                        } else {
+                            when (prediction.status?.short) {
+                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                    predictionOutcome =
+                                        if (prediction.score.fulltime.away > prediction.score.fulltime.home!!) {
+                                            "WON"
+                                        } else {
+                                            "LOST"
+                                        }
+                                }
+                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                    predictionOutcome = "TBD"
+                                }
+                            }
+                        }
+
+                    }
+                    "" -> {
+
+                        predictionOutcome = "TBD"
+                    }
+
+                }
+
+                Log.e("Game is ", predictionOutcome)
+
+                PredictionListItemDark(prediction, predictionOutcome)
             }
         }
 
@@ -55,7 +150,7 @@ fun PredictionsScreen(
 
 @ExperimentalCoilApi
 @Composable
-fun PredictionListItemDark(prediction: Prediction) {
+fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String) {
 
     Surface(color = colorResource(R.color.dark_mode)) {
 
@@ -150,8 +245,23 @@ fun PredictionListItemDark(prediction: Prediction) {
                                 .padding(top = 5.dp)
                         )
 
+                        var predColor = colorResource(R.color.colorLightGrey)
+
+
+                        when (predictionOutcome) {
+                            "TBD" -> {
+                                predColor = colorResource(R.color.colorLightGrey)
+                            }
+                            "WON" -> {
+                                predColor = colorResource(R.color.dark_green)
+                            }
+                            "LOST" -> {
+                                predColor = colorResource(R.color.colorLightRed)
+                            }
+                        }
+
                         Surface(
-                            color = colorResource(R.color.dark_green),
+                            color = predColor,
                             shape = RoundedCornerShape(6.dp),
                             modifier = Modifier
                                 .padding(top = 20.dp)
@@ -159,7 +269,7 @@ fun PredictionListItemDark(prediction: Prediction) {
 
                         ) {
                             Text(
-                                text = "Home Win or Draw",
+                                text = prediction.predictionString.toString(),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color.White,

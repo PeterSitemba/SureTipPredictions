@@ -143,6 +143,6 @@ fun FirstTimeLoading() {
             .wrapContentSize(Alignment.Center)
     ) {
 
-        CircularProgressIndicator(color = Color.White)
+        CircularProgressIndicator(color = colorResource(R.color.colorLightBlue))
     }
 }

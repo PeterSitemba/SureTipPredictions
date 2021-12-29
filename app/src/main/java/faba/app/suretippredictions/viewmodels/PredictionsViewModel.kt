@@ -51,8 +51,43 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                     while (true) {
 
+
                         response.let { data ->
                             data.listPredictions()?.items()?.forEach {
+
+                                val predictions = gson.fromJson(
+                                    it.predictions() as String?,
+                                    Predictions::class.java
+                                )
+
+                                var predictionString = ""
+
+
+                                val homeId = it.homeId()
+                                val awayId = it.awayId()
+
+                                if(predictions.win_or_draw){
+                                    when(predictions.winner.id){
+                                        homeId -> {
+                                            predictionString = "Home Win or Draw"
+
+                                        }
+                                        awayId -> {
+                                            predictionString = "Away Win or Draw"
+                                        }
+                                    }
+
+                                }else{
+                                    when(predictions.winner.id){
+                                        homeId -> {
+                                            predictionString = "Home Win"
+
+                                        }
+                                        awayId -> {
+                                            predictionString = "Away Win"
+                                        }
+                                    }
+                                }
 
                                 val prediction = Prediction(
                                     it!!.id(),
@@ -98,7 +133,8 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                     null,
                                     null,
                                     null,
-                                    null
+                                    null,
+                                    predictionString
 
                                 )
 
