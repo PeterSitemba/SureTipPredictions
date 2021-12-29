@@ -1,20 +1,15 @@
 package faba.app.suretippredictions.uicomponents
 
 
-import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,13 +31,18 @@ import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.screens.AllGamesScreen
 import faba.app.suretippredictions.screens.FavoritesScreen
 import faba.app.suretippredictions.screens.PredictionsScreen
+import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.launch
 
 
 @ExperimentalCoilApi
 @ExperimentalMaterialApi
 @Composable
-fun SureScorePredictionsMain(predictionList: List<Prediction>, error: String) {
+fun SureScorePredictionsMain(
+    predictionList: List<Prediction>,
+    error: String,
+    firstTimeLoading: Boolean
+) {
 
     var appTitle by remember { mutableStateOf("") }
     var topAppBarIconsName by remember { mutableStateOf("") }
@@ -133,14 +133,22 @@ fun SureScorePredictionsMain(predictionList: List<Prediction>, error: String) {
             navController = navController,
             predictionList,
             onSetAppTitle = { appTitle = it },
-            topAppBarIconsName = { topAppBarIconsName = it })
+            topAppBarIconsName = { topAppBarIconsName = it },
+            firstTimeLoading
+            )
 
         if (error.isNotEmpty()) {
             coroutineScope.launch {
-                scaffoldState.snackbarHostState.showSnackbar(
+                val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
                     message = error,
                     actionLabel = "Refresh"
                 )
+
+                when(snackbarResult){
+                    SnackbarResult.ActionPerformed -> {
+
+                    }
+                }
             }
         }
 
@@ -154,28 +162,32 @@ fun Navigation(
     navController: NavHostController,
     predictionList: List<Prediction>,
     onSetAppTitle: (String) -> Unit,
-    topAppBarIconsName: (String) -> Unit
+    topAppBarIconsName: (String) -> Unit,
+    firstTimeLoading: Boolean
 ) {
     NavHost(navController = navController, startDestination = NavigationItem.Main.route) {
         composable(NavigationItem.AllGames.route) {
             AllGamesScreen(
                 predictionList,
                 onSetAppTitle,
-                topAppBarIconsName
+                topAppBarIconsName,
+                firstTimeLoading
             )
         }
         composable(NavigationItem.Main.route) {
             PredictionsScreen(
                 predictionList.filter { it.league?.id in Constants.mainLeaguesList },
                 onSetAppTitle,
-                topAppBarIconsName
+                topAppBarIconsName,
+                firstTimeLoading
             )
         }
         composable(NavigationItem.Favorites.route) {
             FavoritesScreen(
                 predictionList,
                 onSetAppTitle,
-                topAppBarIconsName
+                topAppBarIconsName,
+                firstTimeLoading
             )
         }
     }

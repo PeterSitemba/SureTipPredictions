@@ -53,7 +53,7 @@ class NetworkConnectionInterceptor(context: Context) : Interceptor {
         return result
     }
 
-    private fun isInternetAvailable(): Boolean {
+    fun isInternetAvailable(): Boolean {
         return try {
             if (isNetworkAvailable()) {
                 val ipAddr: InetAddress = InetAddress.getByName("google.com")

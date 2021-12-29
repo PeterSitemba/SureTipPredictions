@@ -22,22 +22,33 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import faba.app.suretippredictions.FirstTimeLoading
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 
 @ExperimentalCoilApi
 @Composable
-fun PredictionsScreen(prediction: List<Prediction>, onSetAppTitle: (String) -> Unit, onTopAppBarIconsName: (String) -> Unit) {
+fun PredictionsScreen(
+    prediction: List<Prediction>,
+    onSetAppTitle: (String) -> Unit,
+    onTopAppBarIconsName: (String) -> Unit,
+    firstTimeLoading: Boolean
+) {
 
     onSetAppTitle("SureScore Predictions")
     onTopAppBarIconsName("Main")
 
-
-    LazyColumn(modifier = Modifier.padding(bottom = 60.dp)) {
-        items(prediction) { prediction ->
-            PredictionListItemDark(prediction)
+    if (firstTimeLoading) {
+        FirstTimeLoading()
+    } else {
+        LazyColumn(modifier = Modifier.padding(bottom = 50.dp)) {
+            items(prediction) { prediction ->
+                PredictionListItemDark(prediction)
+            }
         }
+
     }
+
 
 }
 
@@ -120,9 +131,9 @@ fun PredictionListItemDark(prediction: Prediction) {
                     Column(
                         modifier = Modifier.width(100.dp)
                     ) {
-                        var goals: String = if(prediction.goals?.home == null){
+                        var goals: String = if (prediction.goals?.home == null) {
                             "VS"
-                        }else{
+                        } else {
                             "${prediction.goals?.home} - ${prediction.goals?.away}"
                         }
 

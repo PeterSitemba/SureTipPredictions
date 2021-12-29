@@ -1,23 +1,32 @@
 package faba.app.suretippredictions
 
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import faba.app.suretippredictions.database.Prediction
-import faba.app.suretippredictions.screens.PredictionsScreen
+import faba.app.suretippredictions.service.NetworkConnectionInterceptor
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.uicomponents.SureScorePredictionsMain
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
@@ -40,7 +49,7 @@ class MainActivity : ComponentActivity() {
             )
 
             SureTipPredictionsTheme(true) {
-                MainActivityScreen(predictionsViewModel, "2021-12-04")
+                MainActivityScreen(predictionsViewModel, "2021-12-04", applicationContext)
             }
 
             iniObservables("2021-12-04")
@@ -79,32 +88,35 @@ class MainActivity : ComponentActivity() {
 
 }
 
+@ExperimentalCoilApi
 @ExperimentalMaterialApi
 @Composable
-fun MainActivityScreen(predictionsViewModel: PredictionsViewModel, date: String) {
+fun MainActivityScreen(predictionsViewModel: PredictionsViewModel, date: String, context: Context) {
+
+    var isInternet = ""
 
     val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
         .observeAsState(listOf())
 
     val error by predictionsViewModel.errorMessage.observeAsState("")
 
+
     if (predictionItems.isEmpty()) {
-        CircularProgressIndicator()
+        //first time loading
+        SureScorePredictionsMain(
+            predictionItems,
+            error,
+            firstTimeLoading = true
+        )
+        //return
     } else {
+        SureScorePredictionsMain(
+            predictionItems,
+            error,
+            firstTimeLoading = false
+        )
 
 
-        SureTipPredictionsTheme(true) {
-
-            //if (error.isNotEmpty()) ErrorSnack(error)
-
-            //SureScorePredictionsMain(predictionItems.filter { it.league?.id in Constants.mainLeaguesList }, error)
-
-
-            SureScorePredictionsMain(predictionItems, error)
-
-            //PredictionsScreen(predictionItems)
-
-        }
     }
 
 
@@ -115,5 +127,19 @@ fun MainActivityScreen(predictionsViewModel: PredictionsViewModel, date: String)
 fun DefaultPreview() {
     SureTipPredictionsTheme {
         //PredictionList("Android")
+    }
+}
+
+
+@Composable
+fun FirstTimeLoading() {
+    Column(
+        modifier = Modifier
+            .padding(30.dp)
+            .fillMaxWidth()
+            .wrapContentSize(Alignment.Center)
+    ) {
+
+        CircularProgressIndicator(color = Color.White)
     }
 }
