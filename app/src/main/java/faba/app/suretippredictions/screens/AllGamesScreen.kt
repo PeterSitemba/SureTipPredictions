@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import faba.app.suretippredictions.FirstTimeLoading
 import faba.app.suretippredictions.database.Prediction
+import faba.app.suretippredictions.uicomponents.NavigationItem
 
 @ExperimentalCoilApi
 @Composable
@@ -19,8 +20,8 @@ fun AllGamesScreen(
     firstTimeLoading: Boolean
 ) {
 
-    onSetAppTitle("All Games")
-    onTopAppBarIconsName("AllGames")
+    onSetAppTitle(NavigationItem.AllGames.name)
+    onTopAppBarIconsName(NavigationItem.AllGames.name)
 
     if (firstTimeLoading) {
         FirstTimeLoading()

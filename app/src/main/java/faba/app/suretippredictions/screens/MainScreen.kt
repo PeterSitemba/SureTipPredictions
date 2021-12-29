@@ -25,6 +25,7 @@ import coil.compose.rememberImagePainter
 import faba.app.suretippredictions.FirstTimeLoading
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
+import faba.app.suretippredictions.uicomponents.NavigationItem
 
 @ExperimentalCoilApi
 @Composable
@@ -36,7 +37,7 @@ fun PredictionsScreen(
 ) {
 
     onSetAppTitle("SureScore Predictions")
-    onTopAppBarIconsName("Main")
+    onTopAppBarIconsName(NavigationItem.Main.name)
 
     if (firstTimeLoading) {
         FirstTimeLoading()

@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -61,8 +62,10 @@ fun SureScorePredictionsMain(
                 title = { Text(appTitle) },
                 actions = {
 
+
+
                     when (topAppBarIconsName) {
-                        "AllGames", "Main" -> {
+                        NavigationItem.AllGames.name, NavigationItem.Main.name -> {
 
                             IconButton(onClick = { /* doSomething() */ }) {
                                 Icon(
@@ -82,7 +85,7 @@ fun SureScorePredictionsMain(
 
 
                         }
-                        "Favorites" -> {
+                        NavigationItem.Favorites.name -> {
                             IconButton(onClick = { /* doSomething() */ }) {
                                 Icon(
                                     Icons.Filled.Search,

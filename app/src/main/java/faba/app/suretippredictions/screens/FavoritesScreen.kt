@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import faba.app.suretippredictions.FirstTimeLoading
 import faba.app.suretippredictions.database.Prediction
+import faba.app.suretippredictions.uicomponents.NavigationItem
 
 @ExperimentalCoilApi
 @Composable
@@ -19,8 +20,8 @@ fun FavoritesScreen(
     firstTimeLoading: Boolean
 ) {
 
-    onSetAppTitle("Favorites")
-    onTopAppBarIconsName("Favorites")
+    onSetAppTitle(NavigationItem.Favorites.name)
+    onTopAppBarIconsName(NavigationItem.Favorites.name)
 
     if (firstTimeLoading) {
         FirstTimeLoading()
