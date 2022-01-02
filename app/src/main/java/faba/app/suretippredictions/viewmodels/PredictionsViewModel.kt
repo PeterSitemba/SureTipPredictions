@@ -40,10 +40,15 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
     }
 
+    init {
+        loading.value = true
+    }
+
 
     fun listPredictions(date: String) {
         val predictionList = mutableListOf<Prediction>()
         viewModelScope.launch {
+            loading.postValue(true)
             withContext(Dispatchers.IO + exceptionHandler) {
                 try {
 
@@ -311,10 +316,14 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
 
     fun roomPredictionsList(date: String): LiveData<List<Prediction>> {
+        loading.postValue(false)
         return repository.roomPredictionsList(date).asLiveData()
     }
 
-    fun getPredictionsRowCount(date: String) = repository.getPredictionsRowCount(date)?.asLiveData()
+    fun getPredictionsRowCount(date: String): LiveData<Int?>? {
+        loading.postValue(true)
+       return repository.getPredictionsRowCount(date)?.asLiveData()
+    }
 
     private fun onError(message: String) {
         errorMessage.postValue(message)

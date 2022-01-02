@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        
+        <item name="windowSplashScreenBackground">@color/dark_mode</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/outline_sports_soccer_white_24</item>
+
+        <item name="postSplashScreenTheme">@style/Theme.SureTipPredictions</item>
+
+    </style>
+</resources>

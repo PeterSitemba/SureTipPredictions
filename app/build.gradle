@@ -108,6 +108,7 @@ dependencies {
 
     //image dependency
     implementation "io.coil-kt:coil-compose:$coil_version"
+    implementation("io.coil-kt:coil-svg:$coil_version")
 
     api "com.apollographql.apollo:apollo-runtime:$apollo_version"
     api "com.apollographql.apollo:apollo-coroutines-support:$apollo_version"
@@ -117,4 +118,7 @@ dependencies {
 
     //accompanyst api
     implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
+
+    //splash screen api
+    implementation 'androidx.core:core-splashscreen:1.0.0-alpha02'
 }

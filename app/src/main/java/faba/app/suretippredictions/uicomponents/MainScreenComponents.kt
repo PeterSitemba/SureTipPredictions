@@ -1,21 +1,35 @@
 package faba.app.suretippredictions.uicomponents
 
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -25,13 +39,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
+import coil.decode.SvgDecoder
 import faba.app.suretippredictions.Constants
+import faba.app.suretippredictions.Constants.COLLAPSE_ANIMATION_DURATION
+import faba.app.suretippredictions.Constants.EXPAND_ANIMATION_DURATION
+import faba.app.suretippredictions.Constants.FADE_IN_ANIMATION_DURATION
+import faba.app.suretippredictions.Constants.FADE_OUT_ANIMATION_DURATION
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.screens.AllGamesScreen
 import faba.app.suretippredictions.screens.FavoritesScreen
+import faba.app.suretippredictions.screens.PredictionListItemDark
 import faba.app.suretippredictions.screens.PredictionsScreen
+import faba.app.suretippredictions.ui.theme.cardCollapsedBackgroundColor
+import faba.app.suretippredictions.ui.theme.cardExpandedBackgroundColor
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.launch
 
@@ -136,7 +159,7 @@ fun SureScorePredictionsMain(
             onSetAppTitle = { appTitle = it },
             topAppBarIconsName = { topAppBarIconsName = it },
             firstTimeLoading
-            )
+        )
 
         if (error.isNotEmpty()) {
             coroutineScope.launch {
@@ -145,7 +168,7 @@ fun SureScorePredictionsMain(
                     actionLabel = "Refresh"
                 )
 
-                when(snackbarResult){
+                when (snackbarResult) {
                     SnackbarResult.ActionPerformed -> {
 
                     }
@@ -240,6 +263,176 @@ fun BottomNavigationBar(
     }
 }
 
+@ExperimentalCoilApi
+@Composable
+fun CollapsableLazyColumn(
+    leagues: List<List<Prediction>>,
+    startCollapsed: Boolean,
+    modifier: Modifier = Modifier
+
+) {
+    val collapsedState = remember(leagues) { leagues.map { startCollapsed }.toMutableStateList() }
+    LazyColumn(modifier) {
+
+        leagues.sortedWith (compareBy({it[0].league?.id}, {it[0].league?.country})).forEachIndexed { i, dataItem ->
+
+            val collapsed = collapsedState[i]
+            item(key = "header_$i") {
+
+                Divider()
+
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable {
+                            collapsedState[i] = !collapsed
+                        }
+                        .padding(top = 10.dp, bottom = 10.dp)
+                ) {
+                    Icon(
+                        Icons.Default.run {
+                            if (collapsed)
+                                KeyboardArrowDown
+                            else
+                                KeyboardArrowUp
+                        },
+                        contentDescription = "",
+                        tint = Color.LightGray,
+                    )
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    Image(
+                        painter = rememberImagePainter(dataItem[0].league?.flag, builder = {
+                            decoder(SvgDecoder(LocalContext.current))
+                        }),
+                        contentDescription = "league",
+                        modifier = Modifier
+                            .size(width = 20.dp, height = 20.dp)
+                    )
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+
+                    Text(
+                        "${dataItem[0].league?.country} - ${dataItem[0].league?.name!!}",
+                        Modifier
+                            .align(
+                                alignment = Alignment.CenterVertically
+                            )
+                            .weight(1f),
+                        fontWeight = FontWeight.Bold
+                    )
+
+                }
+
+                if (collapsed) {
+                    Divider()
+                }
+            }
+
+            if (!collapsed) {
+                items(dataItem) { prediction ->
+                    var predictionOutcome by remember { mutableStateOf("") }
+                    when (prediction.predictionString) {
+                        "Home Win or Draw" -> {
+
+                            if (prediction.score?.fulltime?.home == null) {
+                                predictionOutcome = "TBD"
+                            } else {
+                                when (prediction.status?.short) {
+                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                        predictionOutcome =
+                                            if (prediction.score.fulltime.home >= prediction.score.fulltime.away!!) {
+                                                "WON"
+                                            } else {
+                                                "LOST"
+                                            }
+                                    }
+                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                        predictionOutcome = "TBD"
+                                    }
+                                }
+                            }
+                        }
+                        "Away Win or Draw" -> {
+
+                            if (prediction.score?.fulltime?.away == null) {
+                                predictionOutcome = "TBD"
+                            } else {
+                                when (prediction.status?.short) {
+                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                        predictionOutcome =
+                                            if (prediction.score.fulltime.away >= prediction.score.fulltime.home!!) {
+                                                "WON"
+                                            } else {
+                                                "LOST"
+                                            }
+                                    }
+                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                        predictionOutcome = "TBD"
+                                    }
+                                }
+                            }
+                        }
+                        "Home Win" -> {
+
+                            if (prediction.score?.fulltime?.home == null) {
+                                predictionOutcome = "TBD"
+                            } else {
+                                when (prediction.status?.short) {
+                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                        predictionOutcome =
+                                            if (prediction.score.fulltime.home > prediction.score.fulltime.away!!) {
+                                                "WON"
+                                            } else {
+                                                "LOST"
+                                            }
+                                    }
+                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                        predictionOutcome = "TBD"
+                                    }
+                                }
+                            }
+
+                        }
+                        "Away Win" -> {
+
+                            if (prediction.score?.fulltime?.away == null) {
+                                predictionOutcome = "TBD"
+                            } else {
+                                when (prediction.status?.short) {
+                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                                        predictionOutcome =
+                                            if (prediction.score.fulltime.away > prediction.score.fulltime.home!!) {
+                                                "WON"
+                                            } else {
+                                                "LOST"
+                                            }
+                                    }
+                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                                        predictionOutcome = "TBD"
+                                    }
+                                }
+                            }
+
+                        }
+                        "" -> {
+
+                            predictionOutcome = "TBD"
+                        }
+
+                    }
+
+                    Log.e("Game is ", predictionOutcome)
+
+                    PredictionListItemDark(prediction, predictionOutcome)
+                }
+            }
+        }
+    }
+}
 
 /*@Composable
 fun PredictionListItem() {
@@ -465,19 +658,3 @@ fun PredictionListItem() {
 
 
 }*/
-
-@Composable
-fun PredictionHeaderItem() {
-
-    Text(text = "England", textAlign = TextAlign.Center)
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PredictionListItemPreview() {
-    SureTipPredictionsTheme {
-        //PredictionListItemDark()
-    }
-}
-

@@ -5,7 +5,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
@@ -26,7 +29,10 @@ import coil.compose.rememberImagePainter
 import faba.app.suretippredictions.FirstTimeLoading
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
+import faba.app.suretippredictions.uicomponents.CollapsableLazyColumn
 import faba.app.suretippredictions.uicomponents.NavigationItem
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalCoilApi
 @Composable
@@ -43,105 +49,10 @@ fun PredictionsScreen(
     if (firstTimeLoading) {
         FirstTimeLoading()
     } else {
-        LazyColumn(modifier = Modifier.padding(bottom = 50.dp)) {
-            items(prediction) { prediction ->
 
-                var predictionOutcome by remember { mutableStateOf("") }
-                when (prediction.predictionString) {
-                    "Home Win or Draw" -> {
+        val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
 
-                        if (prediction.score?.fulltime?.home == null) {
-                            predictionOutcome = "TBD"
-                        } else {
-                            when (prediction.status?.short) {
-                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                    predictionOutcome =
-                                        if (prediction.score.fulltime.home >= prediction.score.fulltime.away!!) {
-                                            "WON"
-                                        } else {
-                                            "LOST"
-                                        }
-                                }
-                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                    predictionOutcome = "TBD"
-                                }
-                            }
-                        }
-                    }
-                    "Away Win or Draw" -> {
-
-                        if (prediction.score?.fulltime?.away == null) {
-                            predictionOutcome = "TBD"
-                        } else {
-                            when (prediction.status?.short) {
-                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                    predictionOutcome =
-                                        if (prediction.score.fulltime.away >= prediction.score.fulltime.home!!) {
-                                            "WON"
-                                        } else {
-                                            "LOST"
-                                        }
-                                }
-                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                    predictionOutcome = "TBD"
-                                }
-                            }
-                        }
-                    }
-                    "Home Win" -> {
-
-                        if (prediction.score?.fulltime?.home == null) {
-                            predictionOutcome = "TBD"
-                        } else {
-                            when (prediction.status?.short) {
-                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                    predictionOutcome =
-                                        if (prediction.score.fulltime.home > prediction.score.fulltime.away!!) {
-                                            "WON"
-                                        } else {
-                                            "LOST"
-                                        }
-                                }
-                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                    predictionOutcome = "TBD"
-                                }
-                            }
-                        }
-
-                    }
-                    "Away Win" -> {
-
-                        if (prediction.score?.fulltime?.away == null) {
-                            predictionOutcome = "TBD"
-                        } else {
-                            when (prediction.status?.short) {
-                                "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                    predictionOutcome =
-                                        if (prediction.score.fulltime.away > prediction.score.fulltime.home!!) {
-                                            "WON"
-                                        } else {
-                                            "LOST"
-                                        }
-                                }
-                                "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                    predictionOutcome = "TBD"
-                                }
-                            }
-                        }
-
-                    }
-                    "" -> {
-
-                        predictionOutcome = "TBD"
-                    }
-
-                }
-
-                Log.e("Game is ", predictionOutcome)
-
-                PredictionListItemDark(prediction, predictionOutcome)
-            }
-        }
+        CollapsableLazyColumn(leagues = groupedLeaguesNo.toList(), false)
 
     }
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import coil.annotation.ExperimentalCoilApi
@@ -40,6 +41,13 @@ class MainActivity : ComponentActivity() {
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        installSplashScreen().apply {
+            this.setKeepVisibleCondition{
+                predictionsViewModel.loading.value!!
+            }
+        }
+
         setContent {
 
             val systemUiController = rememberSystemUiController()
@@ -105,6 +113,7 @@ fun MainActivityScreen(
 
 
     if (predictionItems.isEmpty()) {
+
         //first time loading
         SureScorePredictionsMain(
             predictionItems,
