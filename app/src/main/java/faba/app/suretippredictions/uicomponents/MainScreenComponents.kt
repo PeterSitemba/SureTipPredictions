@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -57,6 +60,7 @@ import faba.app.suretippredictions.ui.theme.cardCollapsedBackgroundColor
 import faba.app.suretippredictions.ui.theme.cardExpandedBackgroundColor
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 
 @ExperimentalCoilApi
@@ -263,77 +267,110 @@ fun BottomNavigationBar(
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun CollapsableLazyColumn(
     leagues: List<List<Prediction>>,
     startCollapsed: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.padding(bottom = 60.dp)
 
 ) {
     val collapsedState = remember(leagues) { leagues.map { startCollapsed }.toMutableStateList() }
-    LazyColumn(modifier) {
+    val listState = rememberLazyListState()
 
-        leagues.sortedWith (compareBy({it[0].league?.id}, {it[0].league?.country})).forEachIndexed { i, dataItem ->
+    val enterFadeIn = remember {
+        fadeIn(
+            animationSpec = TweenSpec(
+                durationMillis = FADE_IN_ANIMATION_DURATION,
+                easing = FastOutLinearInEasing
+            )
+        )
+    }
+    val enterExpand = remember {
+        expandVertically(animationSpec = tween(EXPAND_ANIMATION_DURATION))
+    }
+    val exitFadeOut = remember {
+        fadeOut(
+            animationSpec = TweenSpec(
+                durationMillis = FADE_OUT_ANIMATION_DURATION,
+                easing = LinearOutSlowInEasing
+            )
+        )
+    }
+    val exitCollapse = remember {
+        shrinkVertically(animationSpec = tween(COLLAPSE_ANIMATION_DURATION))
+    }
 
-            val collapsed = collapsedState[i]
-            item(key = "header_$i") {
-
-                Divider()
-
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clickable {
-                            collapsedState[i] = !collapsed
-                        }
-                        .padding(top = 10.dp, bottom = 10.dp)
-                ) {
-                    Icon(
-                        Icons.Default.run {
-                            if (collapsed)
-                                KeyboardArrowDown
-                            else
-                                KeyboardArrowUp
-                        },
-                        contentDescription = "",
-                        tint = Color.LightGray,
-                    )
-
-                    Spacer(modifier = Modifier.size(10.dp))
-
-                    Image(
-                        painter = rememberImagePainter(dataItem[0].league?.flag, builder = {
-                            decoder(SvgDecoder(LocalContext.current))
-                        }),
-                        contentDescription = "league",
-                        modifier = Modifier
-                            .size(width = 20.dp, height = 20.dp)
-                    )
-
-                    Spacer(modifier = Modifier.size(10.dp))
+    LazyColumn(modifier, state = listState) {
 
 
-                    Text(
-                        "${dataItem[0].league?.country} - ${dataItem[0].league?.name!!}",
-                        Modifier
-                            .align(
-                                alignment = Alignment.CenterVertically
-                            )
-                            .weight(1f),
-                        fontWeight = FontWeight.Bold
-                    )
+        leagues.sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
+            .forEachIndexed { i, dataItem ->
 
-                }
+                val collapsed = collapsedState[i]
 
-                if (collapsed) {
+                item(key = "header_$i") {
+
+
                     Divider()
-                }
-            }
 
-            if (!collapsed) {
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable {
+                                collapsedState[i] = !collapsed
+                            }
+                            .padding(top = 10.dp, bottom = 10.dp)
+
+                    ) {
+                        Icon(
+                            Icons.Default.run {
+                                if (collapsed)
+                                    KeyboardArrowDown
+                                else
+                                    KeyboardArrowUp
+                            },
+                            contentDescription = "",
+                            tint = Color.LightGray,
+                        )
+
+                        Spacer(modifier = Modifier.size(10.dp))
+
+                        Image(
+                            painter = rememberImagePainter(dataItem[0].league?.flag, builder = {
+                                decoder(SvgDecoder(LocalContext.current))
+                            }),
+                            contentDescription = "league",
+                            modifier = Modifier
+                                .size(width = 20.dp, height = 20.dp)
+                        )
+
+                        Spacer(modifier = Modifier.size(10.dp))
+
+
+                        Text(
+                            "${dataItem[0].league?.country} - ${dataItem[0].league?.name!!}",
+                            Modifier
+                                .align(
+                                    alignment = Alignment.CenterVertically
+                                )
+                                .weight(1f),
+                            fontWeight = FontWeight.Bold
+                        )
+
+                    }
+
+                    if (collapsed) {
+                        Divider()
+                    }
+
+
+                }
+
                 items(dataItem) { prediction ->
+
                     var predictionOutcome by remember { mutableStateOf("") }
                     when (prediction.predictionString) {
                         "Home Win or Draw" -> {
@@ -427,11 +464,24 @@ fun CollapsableLazyColumn(
 
                     Log.e("Game is ", predictionOutcome)
 
-                    PredictionListItemDark(prediction, predictionOutcome)
+
+                    AnimatedVisibility(
+                        visible = !collapsed,
+                        enter = enterExpand + enterFadeIn,
+                        exit = exitCollapse + exitFadeOut
+                    ) {
+
+                        if (!collapsed) {
+                            PredictionListItemDark(prediction, predictionOutcome)
+
+                        }
+
+                    }
                 }
+
             }
-        }
     }
+
 }
 
 /*@Composable
