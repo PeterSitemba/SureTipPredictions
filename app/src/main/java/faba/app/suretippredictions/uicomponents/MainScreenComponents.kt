@@ -63,6 +63,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalMaterialApi
 @Composable
@@ -184,6 +185,7 @@ fun SureScorePredictionsMain(
 
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun Navigation(
@@ -305,8 +307,7 @@ fun CollapsableLazyColumn(
     LazyColumn(modifier, state = listState) {
 
 
-        leagues.sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
-            .forEachIndexed { i, dataItem ->
+        leagues.forEachIndexed { i, dataItem ->
 
                 val collapsed = collapsedState[i]
 

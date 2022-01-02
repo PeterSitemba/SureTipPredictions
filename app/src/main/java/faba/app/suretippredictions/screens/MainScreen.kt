@@ -1,6 +1,7 @@
 package faba.app.suretippredictions.screens
 
 import android.util.Log
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +35,7 @@ import faba.app.suretippredictions.uicomponents.NavigationItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun PredictionsScreen(
@@ -52,12 +54,14 @@ fun PredictionsScreen(
 
         val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
 
-        CollapsableLazyColumn(leagues = groupedLeaguesNo.toList(), false)
-
+        CollapsableLazyColumn(
+            leagues = groupedLeaguesNo.toList()
+                .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country })), false
+        )
     }
 
-
 }
+
 
 @ExperimentalCoilApi
 @Composable
