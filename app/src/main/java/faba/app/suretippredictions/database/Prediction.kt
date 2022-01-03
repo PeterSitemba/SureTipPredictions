@@ -1,9 +1,11 @@
 package faba.app.suretippredictions.database
 
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 import faba.app.suretippredictions.models.fixtures.Goals
 import faba.app.suretippredictions.models.odds.Bookmaker
-import faba.app.suretippredictions.models.odds.Fixture
 import faba.app.suretippredictions.models.predictions.*
 
 @Entity(tableName = "predictions_table")

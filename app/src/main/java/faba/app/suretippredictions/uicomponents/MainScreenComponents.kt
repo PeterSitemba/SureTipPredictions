@@ -1,10 +1,12 @@
 package faba.app.suretippredictions.uicomponents
 
 
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,21 +22,16 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -49,18 +46,12 @@ import faba.app.suretippredictions.Constants.COLLAPSE_ANIMATION_DURATION
 import faba.app.suretippredictions.Constants.EXPAND_ANIMATION_DURATION
 import faba.app.suretippredictions.Constants.FADE_IN_ANIMATION_DURATION
 import faba.app.suretippredictions.Constants.FADE_OUT_ANIMATION_DURATION
-import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.screens.AllGamesScreen
 import faba.app.suretippredictions.screens.FavoritesScreen
-import faba.app.suretippredictions.screens.PredictionListItemDark
 import faba.app.suretippredictions.screens.PredictionsScreen
-import faba.app.suretippredictions.ui.theme.cardCollapsedBackgroundColor
-import faba.app.suretippredictions.ui.theme.cardExpandedBackgroundColor
-import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 
 @ExperimentalAnimationApi
@@ -281,6 +272,88 @@ fun CollapsableLazyColumn(
     val collapsedState = remember(leagues) { leagues.map { startCollapsed }.toMutableStateList() }
     val listState = rememberLazyListState()
 
+
+
+    LazyColumn(modifier, state = listState) {
+
+
+        leagues.forEachIndexed { i, dataItem ->
+
+            val collapsed = collapsedState[i]
+
+            item(key = "header_$i") {
+
+
+                Divider()
+
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable {
+                            collapsedState[i] = !collapsed
+                        }
+                        .padding(top = 10.dp, bottom = 10.dp)
+
+                ) {
+                    Icon(
+                        Icons.Default.run {
+                            if (collapsed)
+                                KeyboardArrowDown
+                            else
+                                KeyboardArrowUp
+                        },
+                        contentDescription = "",
+                        tint = Color.LightGray,
+                    )
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    Image(
+                        painter = rememberImagePainter(dataItem[0].league?.flag, builder = {
+                            decoder(SvgDecoder(LocalContext.current))
+                        }),
+                        contentDescription = "league",
+                        modifier = Modifier
+                            .size(width = 20.dp, height = 20.dp)
+                    )
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+
+                    Text(
+                        "${dataItem[0].league?.country} - ${dataItem[0].league?.name!!}",
+                        Modifier
+                            .align(
+                                alignment = Alignment.CenterVertically
+                            )
+                            .weight(1f),
+                        fontWeight = FontWeight.Bold
+                    )
+
+                }
+
+                if (collapsed) {
+                    Divider()
+                }
+
+
+            }
+
+            items(dataItem) { prediction ->
+                PredictionContent(prediction = prediction, collapsed = collapsed)
+            }
+
+        }
+    }
+
+}
+
+@ExperimentalCoilApi
+@ExperimentalAnimationApi
+@Composable
+fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
+
     val enterFadeIn = remember {
         fadeIn(
             animationSpec = TweenSpec(
@@ -304,184 +377,300 @@ fun CollapsableLazyColumn(
         shrinkVertically(animationSpec = tween(COLLAPSE_ANIMATION_DURATION))
     }
 
-    LazyColumn(modifier, state = listState) {
+    var predictionOutcome by remember { mutableStateOf("") }
+    when (prediction.predictionString) {
+        "Home Win or Draw" -> {
 
-
-        leagues.forEachIndexed { i, dataItem ->
-
-                val collapsed = collapsedState[i]
-
-                item(key = "header_$i") {
-
-
-                    Divider()
-
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clickable {
-                                collapsedState[i] = !collapsed
+            if (prediction.score?.fulltime?.home == null) {
+                predictionOutcome = "TBD"
+            } else {
+                when (prediction.status?.short) {
+                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                        predictionOutcome =
+                            if (prediction.score.fulltime.home >= prediction.score.fulltime.away!!) {
+                                "WON"
+                            } else {
+                                "LOST"
                             }
-                            .padding(top = 10.dp, bottom = 10.dp)
+                    }
+                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                        predictionOutcome = "TBD"
+                    }
+                }
+            }
+        }
+        "Away Win or Draw" -> {
 
-                    ) {
+            if (prediction.score?.fulltime?.away == null) {
+                predictionOutcome = "TBD"
+            } else {
+                when (prediction.status?.short) {
+                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                        predictionOutcome =
+                            if (prediction.score.fulltime.away >= prediction.score.fulltime.home!!) {
+                                "WON"
+                            } else {
+                                "LOST"
+                            }
+                    }
+                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                        predictionOutcome = "TBD"
+                    }
+                }
+            }
+        }
+        "Home Win" -> {
+
+            if (prediction.score?.fulltime?.home == null) {
+                predictionOutcome = "TBD"
+            } else {
+                when (prediction.status?.short) {
+                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                        predictionOutcome =
+                            if (prediction.score.fulltime.home > prediction.score.fulltime.away!!) {
+                                "WON"
+                            } else {
+                                "LOST"
+                            }
+                    }
+                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                        predictionOutcome = "TBD"
+                    }
+                }
+            }
+
+        }
+        "Away Win" -> {
+
+            if (prediction.score?.fulltime?.away == null) {
+                predictionOutcome = "TBD"
+            } else {
+                when (prediction.status?.short) {
+                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+                        predictionOutcome =
+                            if (prediction.score.fulltime.away > prediction.score.fulltime.home!!) {
+                                "WON"
+                            } else {
+                                "LOST"
+                            }
+                    }
+                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
+                        predictionOutcome = "TBD"
+                    }
+                }
+            }
+
+        }
+        "" -> {
+
+            predictionOutcome = "TBD"
+        }
+
+    }
+
+    Log.e("Game is ", predictionOutcome)
+
+
+    AnimatedVisibility(
+        visible = !collapsed,
+        enter = enterExpand + enterFadeIn,
+        exit = exitCollapse + exitFadeOut
+    ) {
+
+        if (!collapsed) {
+            PredictionListItemDark(prediction, predictionOutcome)
+
+        }
+
+    }
+
+}
+
+@ExperimentalCoilApi
+@Composable
+fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String) {
+
+    Surface(color = colorResource(R.color.dark_mode)) {
+
+        Card(
+            backgroundColor = colorResource(R.color.card_bg),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 10.dp, start = 10.dp, end = 10.dp)
+                .height(120.dp), elevation = 6.dp
+        ) {
+
+            Column {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+
+                        val (icon, text) = createRefs()
                         Icon(
-                            Icons.Default.run {
-                                if (collapsed)
-                                    KeyboardArrowDown
-                                else
-                                    KeyboardArrowUp
-                            },
-                            contentDescription = "",
-                            tint = Color.LightGray,
-                        )
-
-                        Spacer(modifier = Modifier.size(10.dp))
-
-                        Image(
-                            painter = rememberImagePainter(dataItem[0].league?.flag, builder = {
-                                decoder(SvgDecoder(LocalContext.current))
-                            }),
-                            contentDescription = "league",
+                            painter = painterResource(id = R.drawable.outline_star_white_24),
+                            contentDescription = "fav",
                             modifier = Modifier
-                                .size(width = 20.dp, height = 20.dp)
+                                .size(width = 27.dp, height = 27.dp)
+                                .padding(start = 5.dp, top = 5.dp)
+                                .constrainAs(icon) {
+                                    start.linkTo(parent.start)
+                                }
                         )
-
-                        Spacer(modifier = Modifier.size(10.dp))
-
 
                         Text(
-                            "${dataItem[0].league?.country} - ${dataItem[0].league?.name!!}",
-                            Modifier
-                                .align(
-                                    alignment = Alignment.CenterVertically
-                                )
-                                .weight(1f),
-                            fontWeight = FontWeight.Bold
+                            text = prediction.date.toString(),
+                            textAlign = TextAlign.Center,
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.constrainAs(text) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
+
+                        )
+
+
+                    }
+
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .width(100.dp)
+                            .align(Alignment.CenterVertically)
+                            .padding(bottom = 10.dp)
+                    ) {
+                        Image(
+                            painter = rememberImagePainter(prediction.homeLogo),
+                            contentDescription = "team_one",
+                            modifier = Modifier
+                                .size(width = 38.dp, height = 38.dp)
+                                .offset(y = (-10).dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+
+                        Text(
+                            text = prediction.homeName.toString(),
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            maxLines = 2,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        var goals: String = if (prediction.goals?.home == null) {
+                            "VS"
+                        } else {
+                            "${prediction.goals?.home} - ${prediction.goals?.away}"
+                        }
+
+                        Text(
+                            text = goals,
+                            textAlign = TextAlign.Center,
+                            fontSize = 25.sp,
+                            maxLines = 2,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 5.dp)
+                        )
+
+                        var predColor = colorResource(R.color.colorLightGrey)
+
+
+                        when (predictionOutcome) {
+                            "TBD" -> {
+                                predColor = colorResource(R.color.colorLightGrey)
+                            }
+                            "WON" -> {
+                                predColor = colorResource(R.color.dark_green)
+                            }
+                            "LOST" -> {
+                                predColor = colorResource(R.color.colorLightRed)
+                            }
+                        }
+
+                        Surface(
+                            color = predColor,
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier
+                                .padding(top = 20.dp)
+                                .size(width = 104.dp, height = 17.dp)
+
+                        ) {
+                            Text(
+                                text = prediction.predictionString.toString(),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+
+                        }
+
+                        Text(
+                            text = "Odds : 1.32",
+                            textAlign = TextAlign.Center,
+                            fontSize = 11.sp,
+                            maxLines = 2,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
 
                     }
 
-                    if (collapsed) {
-                        Divider()
-                    }
-
-
-                }
-
-                items(dataItem) { prediction ->
-
-                    var predictionOutcome by remember { mutableStateOf("") }
-                    when (prediction.predictionString) {
-                        "Home Win or Draw" -> {
-
-                            if (prediction.score?.fulltime?.home == null) {
-                                predictionOutcome = "TBD"
-                            } else {
-                                when (prediction.status?.short) {
-                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                        predictionOutcome =
-                                            if (prediction.score.fulltime.home >= prediction.score.fulltime.away!!) {
-                                                "WON"
-                                            } else {
-                                                "LOST"
-                                            }
-                                    }
-                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                        predictionOutcome = "TBD"
-                                    }
-                                }
-                            }
-                        }
-                        "Away Win or Draw" -> {
-
-                            if (prediction.score?.fulltime?.away == null) {
-                                predictionOutcome = "TBD"
-                            } else {
-                                when (prediction.status?.short) {
-                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                        predictionOutcome =
-                                            if (prediction.score.fulltime.away >= prediction.score.fulltime.home!!) {
-                                                "WON"
-                                            } else {
-                                                "LOST"
-                                            }
-                                    }
-                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                        predictionOutcome = "TBD"
-                                    }
-                                }
-                            }
-                        }
-                        "Home Win" -> {
-
-                            if (prediction.score?.fulltime?.home == null) {
-                                predictionOutcome = "TBD"
-                            } else {
-                                when (prediction.status?.short) {
-                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                        predictionOutcome =
-                                            if (prediction.score.fulltime.home > prediction.score.fulltime.away!!) {
-                                                "WON"
-                                            } else {
-                                                "LOST"
-                                            }
-                                    }
-                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                        predictionOutcome = "TBD"
-                                    }
-                                }
-                            }
-
-                        }
-                        "Away Win" -> {
-
-                            if (prediction.score?.fulltime?.away == null) {
-                                predictionOutcome = "TBD"
-                            } else {
-                                when (prediction.status?.short) {
-                                    "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
-                                        predictionOutcome =
-                                            if (prediction.score.fulltime.away > prediction.score.fulltime.home!!) {
-                                                "WON"
-                                            } else {
-                                                "LOST"
-                                            }
-                                    }
-                                    "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
-                                        predictionOutcome = "TBD"
-                                    }
-                                }
-                            }
-
-                        }
-                        "" -> {
-
-                            predictionOutcome = "TBD"
-                        }
-
-                    }
-
-                    Log.e("Game is ", predictionOutcome)
-
-
-                    AnimatedVisibility(
-                        visible = !collapsed,
-                        enter = enterExpand + enterFadeIn,
-                        exit = exitCollapse + exitFadeOut
+                    Column(
+                        modifier = Modifier
+                            .width(100.dp)
+                            .align(Alignment.CenterVertically)
+                            .padding(bottom = 10.dp)
                     ) {
+                        Image(
+                            painter = rememberImagePainter(prediction.awayLogo),
+                            contentDescription = "team_one",
+                            modifier = Modifier
+                                .size(width = 38.dp, height = 38.dp)
+                                .offset(y = (-10).dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
 
-                        if (!collapsed) {
-                            PredictionListItemDark(prediction, predictionOutcome)
-
-                        }
-
+                        Text(
+                            text = prediction.awayName.toString(),
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            maxLines = 2,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
+
+
                 }
+
 
             }
+
+
+        }
+
+
     }
+
 
 }
 

@@ -5,10 +5,12 @@ import com.apollographql.apollo.coroutines.await
 import faba.app.suretippredictions.GetFixturesQuery
 import faba.app.suretippredictions.ListOddsQuery
 import faba.app.suretippredictions.ListPredictionsQuery
-import faba.app.suretippredictions.database.*
+import faba.app.suretippredictions.database.Prediction
+import faba.app.suretippredictions.database.PredictionUpdate
+import faba.app.suretippredictions.database.PredictionUpdateOdds
+import faba.app.suretippredictions.database.PredictionsDao
 import faba.app.suretippredictions.service.Apollo
 import faba.app.suretippredictions.service.SafeGuardApiRequest
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class PredictionsRepository @Inject constructor(

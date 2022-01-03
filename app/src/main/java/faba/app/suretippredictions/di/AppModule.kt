@@ -25,7 +25,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideRepository(api: Apollo, predictionsDao: PredictionsDao) = PredictionsRepository(api, predictionsDao)
+    fun provideRepository(api: Apollo, predictionsDao: PredictionsDao) =
+        PredictionsRepository(api, predictionsDao)
 
     @Singleton
     @Provides

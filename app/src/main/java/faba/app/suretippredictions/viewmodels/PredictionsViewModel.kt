@@ -1,6 +1,5 @@
 package faba.app.suretippredictions.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
@@ -8,11 +7,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import faba.app.core.ApiException
 import faba.app.core.NoInternetException
 import faba.app.suretippredictions.database.Prediction
-import faba.app.suretippredictions.models.odds.Bookmaker
-import faba.app.suretippredictions.models.odds.Fixture
 import faba.app.suretippredictions.database.PredictionUpdate
 import faba.app.suretippredictions.database.PredictionUpdateOdds
 import faba.app.suretippredictions.models.fixtures.Goals
+import faba.app.suretippredictions.models.odds.Bookmaker
 import faba.app.suretippredictions.models.predictions.*
 import faba.app.suretippredictions.repository.PredictionsRepository
 import kotlinx.coroutines.*
