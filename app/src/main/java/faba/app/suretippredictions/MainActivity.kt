@@ -57,12 +57,13 @@ class MainActivity : ComponentActivity() {
             )
 
             SureTipPredictionsTheme(true) {
-                MainActivityScreen(predictionsViewModel,"2021-12-25", applicationContext)
+                MainActivityScreen(predictionsViewModel,"2022-01-06", applicationContext)
             }
 
-            iniObservables("2021-12-25")
+            iniObservables("2022-01-06")
 
             updatePredictions()
+
 
 
         }
@@ -75,7 +76,6 @@ class MainActivity : ComponentActivity() {
         predictionsViewModel.getPredictionsRowCount(date)?.observe(this, { pred ->
             if (pred == 0) {
                 predictionsViewModel.listPredictions(date)
-                predictionsViewModel.updatePredictionOdds(date)
             }
         })
 
@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
             withContext(Dispatchers.IO) {
                 //predictionsViewModel.updatePrediction("2021-12-04")
                 while (true) {
-                    predictionsViewModel.updatePrediction("2021-12-25")
+                    predictionsViewModel.updatePrediction("2022-01-06")
                     delay(30000)
                 }
             }

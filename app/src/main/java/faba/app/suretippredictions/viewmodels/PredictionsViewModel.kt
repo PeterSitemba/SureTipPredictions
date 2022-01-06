@@ -1,5 +1,6 @@
 package faba.app.suretippredictions.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
@@ -170,6 +171,9 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                         repository.insertPrediction(it)
                     }
 
+                    updatePredictionOdds(date)
+                    updatePrediction(date)
+
 
                     /* withContext(Dispatchers.Main) {
                          predCounterResponse.value = predCounter
@@ -199,6 +203,8 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                         response.let { data ->
                             data.listFixtures()?.items()?.forEach {
+
+                               //Log.e("The goals are", it.goals().toString())
 
                                 val predictionUpdate = PredictionUpdate(
                                     it.id(),

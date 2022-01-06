@@ -2,6 +2,7 @@ package faba.app.suretippredictions.screens
 
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import coil.annotation.ExperimentalCoilApi
 import faba.app.suretippredictions.FirstTimeLoading
@@ -28,10 +29,14 @@ fun PredictionsScreen(
     } else {
 
         val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
+        val listState = rememberLazyListState()
+        val leagues = groupedLeaguesNo.toList()
+            .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
 
         CollapsableLazyColumn(
-            leagues = groupedLeaguesNo.toList()
-                .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country })), false
+            leagues,
+            listState,
+            false
         )
     }
 

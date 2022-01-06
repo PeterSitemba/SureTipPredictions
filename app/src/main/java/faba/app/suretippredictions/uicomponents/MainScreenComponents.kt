@@ -11,6 +11,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +21,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -265,40 +268,35 @@ fun BottomNavigationBar(
 @Composable
 fun CollapsableLazyColumn(
     leagues: List<List<Prediction>>,
+    listState: LazyListState,
     startCollapsed: Boolean,
     modifier: Modifier = Modifier.padding(bottom = 60.dp)
-
 ) {
-    val collapsedState = remember(leagues) { leagues.map { startCollapsed }.toMutableStateList() }
-    val listState = rememberLazyListState()
-
-
+    val collapsedState = rememberSaveable(leagues) { leagues.map { mutableStateOf(startCollapsed) } }
 
     LazyColumn(modifier, state = listState) {
-
 
         leagues.forEachIndexed { i, dataItem ->
 
             val collapsed = collapsedState[i]
 
+
             item(key = "header_$i") {
 
-
                 Divider()
-
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clickable {
-                            collapsedState[i] = !collapsed
+                            collapsedState[i].value = !collapsed.value
                         }
                         .padding(top = 10.dp, bottom = 10.dp)
 
                 ) {
                     Icon(
                         Icons.Default.run {
-                            if (collapsed)
+                            if (collapsed.value)
                                 KeyboardArrowDown
                             else
                                 KeyboardArrowUp
@@ -333,7 +331,7 @@ fun CollapsableLazyColumn(
 
                 }
 
-                if (collapsed) {
+                if (collapsed.value) {
                     Divider()
                 }
 
@@ -341,13 +339,14 @@ fun CollapsableLazyColumn(
             }
 
             items(dataItem) { prediction ->
-                PredictionContent(prediction = prediction, collapsed = collapsed)
+                PredictionContent(prediction = prediction, collapsed = collapsed.value)
             }
 
         }
     }
 
 }
+
 
 @ExperimentalCoilApi
 @ExperimentalAnimationApi
@@ -378,7 +377,12 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
     }
 
     var predictionOutcome by remember { mutableStateOf("") }
+    var odds by remember { mutableStateOf("") }
+    val oddsList = prediction.odds
+
+
     when (prediction.predictionString) {
+
         "Home Win or Draw" -> {
 
             if (prediction.score?.fulltime?.home == null) {
@@ -398,6 +402,25 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                     }
                 }
             }
+
+
+            if (oddsList != null) {
+                odds = if (oddsList.isNotEmpty()) {
+                    val betDoubleChance = oddsList[0].bets.firstOrNull {
+                        it.id == 12
+                    }
+
+                    betDoubleChance?.values?.firstOrNull {
+                        it.value == "Home/Draw"
+                    }?.odd ?: ""
+
+                } else {
+                    ""
+                }
+            }else{
+                odds = ""
+            }
+
         }
         "Away Win or Draw" -> {
 
@@ -417,6 +440,23 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                         predictionOutcome = "TBD"
                     }
                 }
+            }
+
+            if (oddsList != null) {
+                odds = if (oddsList.isNotEmpty()) {
+                    val betDoubleChance = oddsList[0].bets.firstOrNull {
+                        it.id == 12
+                    }
+
+                    betDoubleChance?.values?.firstOrNull {
+                        it.value == "Draw/Away"
+                    }?.odd ?: ""
+
+                } else {
+                    ""
+                }
+            }else{
+                odds = ""
             }
         }
         "Home Win" -> {
@@ -439,6 +479,24 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                 }
             }
 
+            if (oddsList != null) {
+                odds = if (oddsList.isNotEmpty()) {
+                    val betDoubleChance = oddsList[0].bets.firstOrNull {
+                        it.id == 1
+                    }
+
+                    betDoubleChance?.values?.firstOrNull {
+                        it.value == "Home"
+                    }?.odd ?: ""
+
+                } else {
+                    ""
+                }
+            }else{
+                odds = ""
+            }
+
+
         }
         "Away Win" -> {
 
@@ -460,10 +518,28 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                 }
             }
 
+            if (oddsList != null) {
+                odds = if (oddsList.isNotEmpty()) {
+                    val betDoubleChance = oddsList[0].bets.firstOrNull {
+                        it.id == 1
+                    }
+
+                    betDoubleChance?.values?.firstOrNull {
+                        it.value == "Away"
+                    }?.odd ?: ""
+
+                } else {
+                    ""
+                }
+            }else{
+                odds = ""
+            }
+
         }
         "" -> {
 
             predictionOutcome = "TBD"
+            odds = ""
         }
 
     }
@@ -478,7 +554,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
     ) {
 
         if (!collapsed) {
-            PredictionListItemDark(prediction, predictionOutcome)
+            PredictionListItemDark(prediction, predictionOutcome, odds)
 
         }
 
@@ -488,7 +564,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
 
 @ExperimentalCoilApi
 @Composable
-fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String) {
+fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, odds: String) {
 
     Surface(color = colorResource(R.color.dark_mode)) {
 
@@ -620,8 +696,15 @@ fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String) {
 
                         }
 
+
+                        var theOdds = ""
+
+                        if (odds.isNotEmpty()) {
+                            theOdds = "Odds: $odds"
+                        }
+
                         Text(
-                            text = "Odds : 1.32",
+                            text = theOdds,
                             textAlign = TextAlign.Center,
                             fontSize = 11.sp,
                             maxLines = 2,
