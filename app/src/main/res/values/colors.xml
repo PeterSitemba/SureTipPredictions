@@ -14,5 +14,9 @@
     <color name="colorLightBlue">#00BCD4</color>
     <color name="colorLightGrey">#808080</color>
     <color name="colorLightRed">#CF5135</color>
+    <color name="colorOrange">#FFA500</color>
+    <color name="colorActualLightGrey">#D3D3D3</color>
+
+
 
 </resources>

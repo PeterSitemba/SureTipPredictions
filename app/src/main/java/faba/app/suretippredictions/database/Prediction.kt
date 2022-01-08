@@ -12,6 +12,7 @@ import faba.app.suretippredictions.models.predictions.*
 data class Prediction(
     @PrimaryKey val id: Int,
     val date: String?,
+    val gameTime: String?,
     @ColumnInfo(name = "status")
     @TypeConverters(Converter::class) val status: Status?,
     @ColumnInfo(name = "score")

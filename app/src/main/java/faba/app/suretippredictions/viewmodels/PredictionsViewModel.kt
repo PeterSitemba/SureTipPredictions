@@ -96,6 +96,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                 val prediction = Prediction(
                                     it!!.id(),
                                     it.predictionDate(),
+                                    it.gameTime(),
                                     null,
                                     null,
                                     null,

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,6 +53,8 @@ import faba.app.suretippredictions.screens.AllGamesScreen
 import faba.app.suretippredictions.screens.FavoritesScreen
 import faba.app.suretippredictions.screens.PredictionsScreen
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 @ExperimentalAnimationApi
@@ -269,17 +269,15 @@ fun BottomNavigationBar(
 fun CollapsableLazyColumn(
     leagues: List<List<Prediction>>,
     listState: LazyListState,
-    startCollapsed: Boolean,
-    modifier: Modifier = Modifier.padding(bottom = 60.dp)
+    collapsedState : List<MutableState<Boolean>>,
+    modifier: Modifier = Modifier
 ) {
-    val collapsedState = rememberSaveable(leagues) { leagues.map { mutableStateOf(startCollapsed) } }
 
-    LazyColumn(modifier, state = listState) {
+    LazyColumn(modifier.padding(bottom = 60.dp), state = listState) {
 
         leagues.forEachIndexed { i, dataItem ->
 
             val collapsed = collapsedState[i]
-
 
             item(key = "header_$i") {
 
@@ -377,8 +375,37 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
     }
 
     var predictionOutcome by remember { mutableStateOf("") }
+    var theGameTime by remember { mutableStateOf("") }
+
     var odds by remember { mutableStateOf("") }
+    var gameTextColor = Color.White
     val oddsList = prediction.odds
+
+
+    when (prediction.status?.short) {
+        "FT", "ET", "AET", "PEN", "WO", "P", "BT", "AWD" -> {
+            theGameTime = "FT"
+            gameTextColor = colorResource(R.color.colorActualLightGrey)
+        }
+        "1H", "2H" -> {
+            theGameTime = "${prediction.status.elapsed}'"
+            gameTextColor = colorResource(R.color.colorOrange)
+
+        }
+        "NS" -> {
+            val gameTime = prediction.gameTime.toString().subSequence(11, 16).toString()
+            theGameTime = formatGameTime(gameTime)
+        }
+        "TBD", "HT" -> {
+            theGameTime = prediction.status.short
+        }
+        "SUSP", "INT", "PST", "CANC", "ABD" -> {
+            theGameTime = prediction.status.long
+        }
+        else -> {
+            theGameTime = prediction.status?.short ?: ""
+        }
+    }
 
 
     when (prediction.predictionString) {
@@ -396,11 +423,13 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                             } else {
                                 "LOST"
                             }
+
                     }
                     "LIVE", "TBD", "NS", "1H", "HT", "2H", "SUSP", "INT", "PST", "CANC", "ABD" -> {
                         predictionOutcome = "TBD"
                     }
                 }
+
             }
 
 
@@ -417,7 +446,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                 } else {
                     ""
                 }
-            }else{
+            } else {
                 odds = ""
             }
 
@@ -455,7 +484,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                 } else {
                     ""
                 }
-            }else{
+            } else {
                 odds = ""
             }
         }
@@ -492,7 +521,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                 } else {
                     ""
                 }
-            }else{
+            } else {
                 odds = ""
             }
 
@@ -531,7 +560,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
                 } else {
                     ""
                 }
-            }else{
+            } else {
                 odds = ""
             }
 
@@ -544,7 +573,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
 
     }
 
-    Log.e("Game is ", predictionOutcome)
+    //Log.e("Game is ", predictionOutcome)
 
 
     AnimatedVisibility(
@@ -554,7 +583,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
     ) {
 
         if (!collapsed) {
-            PredictionListItemDark(prediction, predictionOutcome, odds)
+            PredictionListItemDark(prediction, predictionOutcome, odds, theGameTime, gameTextColor)
 
         }
 
@@ -564,7 +593,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
 
 @ExperimentalCoilApi
 @Composable
-fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, odds: String) {
+fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, odds: String, theGameTime: String, gameTextColor: Color) {
 
     Surface(color = colorResource(R.color.dark_mode)) {
 
@@ -592,10 +621,12 @@ fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, od
                                 }
                         )
 
+
+
                         Text(
-                            text = prediction.date.toString(),
+                            text = theGameTime,
                             textAlign = TextAlign.Center,
-                            color = Color.White,
+                            color = gameTextColor,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp,
                             modifier = Modifier.constrainAs(text) {
@@ -677,6 +708,11 @@ fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, od
                             }
                         }
 
+                        if(prediction.predictionString.toString().isEmpty()){
+                            predColor = colorResource(R.color.card_bg)
+                        }
+
+
                         Surface(
                             color = predColor,
                             shape = RoundedCornerShape(6.dp),
@@ -754,6 +790,16 @@ fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, od
 
     }
 
+
+}
+
+fun formatGameTime(gameTime: String): String {
+
+    val df = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+    df.timeZone = TimeZone.getTimeZone("UTC")
+    val date = df.parse(gameTime)
+    df.timeZone = TimeZone.getDefault()
+    return df.format(date)
 
 }
 
