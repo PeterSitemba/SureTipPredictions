@@ -56,10 +56,10 @@ class MainActivity : ComponentActivity() {
             )
 
             SureTipPredictionsTheme(true) {
-                MainActivityScreen(predictionsViewModel, "2022-01-08", applicationContext)
+                MainActivityScreen(predictionsViewModel, "2022-01-09", applicationContext)
             }
 
-            iniObservables("2022-01-08")
+            iniObservables("2022-01-09")
 
             updatePredictions()
 
@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
             withContext(Dispatchers.IO) {
                 //predictionsViewModel.updatePrediction("2021-12-04")
                 while (true) {
-                    predictionsViewModel.updatePrediction("2022-01-08")
+                    predictionsViewModel.updatePrediction("2022-01-09")
                     delay(30000)
                 }
             }

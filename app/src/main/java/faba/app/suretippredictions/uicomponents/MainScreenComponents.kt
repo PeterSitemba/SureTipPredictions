@@ -3,10 +3,7 @@ package faba.app.suretippredictions.uicomponents
 
 import android.util.Log
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.TweenSpec
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +20,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -343,7 +342,7 @@ fun CollapsableLazyColumn(
 
             }
 
-            items(dataItem) { prediction ->
+            items(dataItem, key = { prediction -> prediction.id }) { prediction ->
                 PredictionContent(prediction = prediction, collapsed = collapsed.value)
             }
 
@@ -398,7 +397,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
             gameTextColor = colorResource(R.color.colorActualLightGrey)
         }
         "1H", "2H" -> {
-            theGameTime = "${prediction.status.elapsed}'"
+            theGameTime = "${prediction.status.elapsed}"
             gameTextColor = colorResource(R.color.colorOrange)
 
         }
@@ -601,6 +600,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
 
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun PredictionListItemDark(
@@ -610,6 +610,17 @@ fun PredictionListItemDark(
     theGameTime: String,
     gameTextColor: Color
 ) {
+
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val infinitelyAnimatedFloat = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
 
     Surface(color = colorResource(R.color.dark_mode)) {
 
@@ -638,19 +649,37 @@ fun PredictionListItemDark(
                         )
 
 
+                        Row(modifier = Modifier.constrainAs(text) {
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }) {
+                            Text(
+                                text = theGameTime,
+                                textAlign = TextAlign.Center,
+                                color = gameTextColor,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp
+                            )
 
-                        Text(
-                            text = theGameTime,
-                            textAlign = TextAlign.Center,
-                            color = gameTextColor,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp,
-                            modifier = Modifier.constrainAs(text) {
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
+                            when (prediction.status?.short) {
+                                "1H", "2H" -> {
+                                    Text(
+                                        text = "'",
+                                        textAlign = TextAlign.Center,
+                                        color = gameTextColor,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 18.sp,
+                                        modifier = Modifier.alpha(
+                                            infinitelyAnimatedFloat.value
+                                        )
+
+                                    )
+
+                                }
                             }
 
-                        )
+
+                        }
 
 
                     }
