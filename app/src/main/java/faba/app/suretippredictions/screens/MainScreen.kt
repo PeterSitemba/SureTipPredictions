@@ -31,8 +31,15 @@ fun PredictionsScreen(
 
         val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
         val listState = rememberLazyListState()
+
         val leagues = groupedLeaguesNo.toList()
             .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
+
+        /*  val leagues = remember(groupedLeaguesNo.toList()) {
+              derivedStateOf {  }
+              groupedLeaguesNo.toList()
+                  .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
+          }*/
 
         val leaguesRemembered = remember {
             groupedLeaguesNo.toList()

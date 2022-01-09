@@ -2,11 +2,8 @@ package faba.app.suretippredictions.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.toMutableStateList
 import coil.annotation.ExperimentalCoilApi
 import faba.app.suretippredictions.FirstTimeLoading
 import faba.app.suretippredictions.database.Prediction
@@ -33,7 +30,16 @@ fun AllGamesScreen(
         val listState = rememberLazyListState()
 
         val leagues = groupedLeaguesNo.toList()
-            .sortedWith(compareBy({ it[0].league?.country }, { it[0].league?.id }))
+                .sortedWith(compareBy({ it[0].league?.country }, { it[0].league?.id }))
+
+
+        /*  val leagues = remember(groupedLeaguesNo.toList()) {
+              derivedStateOf {
+                  groupedLeaguesNo.toList()
+                      .sortedWith(compareBy({ it[0].league?.country }, { it[0].league?.id }))
+              }
+
+          }*/
 
         val leaguesRemembered = remember {
             groupedLeaguesNo.toList()

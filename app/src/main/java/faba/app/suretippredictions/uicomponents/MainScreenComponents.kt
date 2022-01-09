@@ -199,8 +199,15 @@ fun Navigation(
             )
         }
         composable(NavigationItem.Main.route) {
+
+            val filteredList by remember(predictionList) {
+                derivedStateOf {
+                    predictionList.filter { it.league?.id in Constants.mainLeaguesList }
+                }
+            }
+
             PredictionsScreen(
-                predictionList.filter { it.league?.id in Constants.mainLeaguesList },
+                filteredList,
                 onSetAppTitle,
                 topAppBarIconsName,
                 firstTimeLoading
@@ -269,7 +276,7 @@ fun BottomNavigationBar(
 fun CollapsableLazyColumn(
     leagues: List<List<Prediction>>,
     listState: LazyListState,
-    collapsedState : List<MutableState<Boolean>>,
+    collapsedState: List<MutableState<Boolean>>,
     modifier: Modifier = Modifier
 ) {
 
@@ -378,7 +385,10 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
     var theGameTime by remember { mutableStateOf("") }
 
     var odds by remember { mutableStateOf("") }
-    var gameTextColor = Color.White
+
+    var gameTextColor by remember {
+        mutableStateOf(Color.White)
+    }
     val oddsList = prediction.odds
 
 
@@ -593,7 +603,13 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
 
 @ExperimentalCoilApi
 @Composable
-fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, odds: String, theGameTime: String, gameTextColor: Color) {
+fun PredictionListItemDark(
+    prediction: Prediction,
+    predictionOutcome: String,
+    odds: String,
+    theGameTime: String,
+    gameTextColor: Color
+) {
 
     Surface(color = colorResource(R.color.dark_mode)) {
 
@@ -708,7 +724,7 @@ fun PredictionListItemDark(prediction: Prediction, predictionOutcome: String, od
                             }
                         }
 
-                        if(prediction.predictionString.toString().isEmpty()){
+                        if (prediction.predictionString.toString().isEmpty()) {
                             predColor = colorResource(R.color.card_bg)
                         }
 

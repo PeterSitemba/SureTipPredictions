@@ -1,5 +1,6 @@
 package faba.app.suretippredictions
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,8 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +31,6 @@ import faba.app.suretippredictions.uicomponents.SureScorePredictionsMain
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
 
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -44,7 +43,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         installSplashScreen().apply {
-            this.setKeepVisibleCondition{
+            this.setKeepVisibleCondition {
                 predictionsViewModel.loading.value!!
             }
         }
@@ -57,13 +56,12 @@ class MainActivity : ComponentActivity() {
             )
 
             SureTipPredictionsTheme(true) {
-                MainActivityScreen(predictionsViewModel,"2022-01-08", applicationContext)
+                MainActivityScreen(predictionsViewModel, "2022-01-08", applicationContext)
             }
 
             iniObservables("2022-01-08")
 
             updatePredictions()
-
 
 
         }
@@ -113,18 +111,24 @@ fun MainActivityScreen(
 
     val error by predictionsViewModel.errorMessage.observeAsState("")
 
+    val predictionList by remember(predictionItems) {
+        derivedStateOf {
+            predictionItems
+        }
+    }
+
 
     if (predictionItems.isEmpty()) {
         //first time loading
         SureScorePredictionsMain(
-            predictionItems,
+            predictionList,
             error,
             firstTimeLoading = true
         )
         //return
     } else {
         SureScorePredictionsMain(
-            predictionItems,
+            predictionList,
             error,
             firstTimeLoading = false
         )
