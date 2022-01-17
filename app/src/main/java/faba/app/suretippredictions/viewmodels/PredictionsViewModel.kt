@@ -1,6 +1,5 @@
 package faba.app.suretippredictions.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
@@ -15,6 +14,7 @@ import faba.app.suretippredictions.models.odds.Bookmaker
 import faba.app.suretippredictions.models.predictions.*
 import faba.app.suretippredictions.repository.PredictionsRepository
 import kotlinx.coroutines.*
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,14 +25,13 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
     val predictionListResponse = MutableLiveData<MutableList<Prediction>>()
 
-    var predCounter = 0
-    var oddCounter = 0
 
     val predCounterResponse = MutableLiveData<Int>()
     val oddCounterResponse = MutableLiveData<Int>()
 
     val errorMessage = MutableLiveData<String>()
     val loading = MutableLiveData<Boolean>()
+    val getLastSelectedDate = MutableLiveData<Long>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         onError("Exception handled: ${throwable.localizedMessage}")
@@ -40,7 +39,9 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     }
 
     init {
+
         loading.value = true
+        getLastSelectedDate.value = Calendar.getInstance().timeInMillis
     }
 
 
@@ -70,8 +71,8 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                 val homeId = it.homeId()
                                 val awayId = it.awayId()
 
-                                if(predictions.win_or_draw){
-                                    when(predictions.winner.id){
+                                if (predictions.win_or_draw) {
+                                    when (predictions.winner.id) {
                                         homeId -> {
                                             predictionString = "Home Win or Draw"
 
@@ -81,8 +82,8 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                         }
                                     }
 
-                                }else{
-                                    when(predictions.winner.id){
+                                } else {
+                                    when (predictions.winner.id) {
                                         homeId -> {
                                             predictionString = "Home Win"
 
@@ -147,7 +148,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                                 if (!predictionList.any { prediction -> prediction.id == it.id() }) {
                                     predictionList.add(prediction)
                                 }
-                                predCounter++
+                                //predCounter++
 
                             }
 
@@ -167,6 +168,12 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                     }
 
 
+                    if (predictionList.size == 0) {
+                        withContext(Dispatchers.Main) {
+                            loading.value = false
+                            //Log.e("First time loading" , firstTimeLoading.value.toString())
+                        }
+                    }
 
                     predictionList.let {
                         repository.insertPrediction(it)
@@ -205,7 +212,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                         response.let { data ->
                             data.listFixtures()?.items()?.forEach {
 
-                               //Log.e("The goals are", it.goals().toString())
+                                //Log.e("The goals are", it.goals().toString())
 
                                 val predictionUpdate = PredictionUpdate(
                                     it.id(),
@@ -248,11 +255,11 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                         repository.updatePrediction(it)
                     }
 
-                }  catch (e: NoInternetException) {
+                } catch (e: NoInternetException) {
                     onError("Something went wrong.\nCheck your internet connection")
                 } catch (e: ApolloException) {
                     onError("Something went wrong.\nCheck your internet connection")
-                }catch (e: ApiException) {
+                } catch (e: ApiException) {
                     onError("Something went wrong.\nCheck your internet connection")
                 }
 
@@ -327,7 +334,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
     fun getPredictionsRowCount(date: String): LiveData<Int?>? {
         loading.postValue(true)
-       return repository.getPredictionsRowCount(date)?.asLiveData()
+        return repository.getPredictionsRowCount(date)?.asLiveData()
     }
 
     private fun onError(message: String) {

@@ -1,18 +1,14 @@
 package faba.app.suretippredictions
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -30,25 +26,42 @@ import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.uicomponents.SureScorePredictionsMain
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
+@ExperimentalCoilApi
+class MainActivity : AppCompatActivity() {
     private val predictionsViewModel: PredictionsViewModel by viewModels()
 
-    @ExperimentalAnimationApi
-    @ExperimentalCoilApi
-    @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         installSplashScreen().apply {
-            this.setKeepVisibleCondition {
+            this.setKeepOnScreenCondition {
                 predictionsViewModel.loading.value!!
             }
         }
 
+        val sdf = SimpleDateFormat("yyyy-MM-dd")
+
+        val currentDate = sdf.format(Date())
+        //val currentDate = "2022-01-11"
+
+
+
         setContent {
+
+            var datePicked : String? by remember {
+                mutableStateOf(currentDate)
+            }
+
+            val updatedDate = { date : Long? ->
+                datePicked = DateFormater(date) ?: currentDate
+            }
+
 
             val systemUiController = rememberSystemUiController()
             systemUiController.setStatusBarColor(
@@ -56,12 +69,13 @@ class MainActivity : ComponentActivity() {
             )
 
             SureTipPredictionsTheme(true) {
-                MainActivityScreen(predictionsViewModel, "2022-01-09", applicationContext)
+                MainActivityScreen(predictionsViewModel, datePicked!!, updatedDate)
+
             }
 
-            iniObservables("2022-01-09")
+            iniObservables(datePicked!!)
 
-            updatePredictions()
+            updatePredictions(datePicked!!)
 
 
         }
@@ -80,16 +94,27 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun updatePredictions(): Job {
+    private fun updatePredictions(date: String): Job {
         return lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 //predictionsViewModel.updatePrediction("2021-12-04")
                 while (true) {
-                    predictionsViewModel.updatePrediction("2022-01-09")
+                    predictionsViewModel.updatePrediction(date)
                     delay(30000)
                 }
             }
         }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun DateFormater(milliseconds : Long?) : String?{
+        milliseconds?.let{
+            val formatter = SimpleDateFormat("yyyy-MM-dd")
+            val calendar: Calendar = Calendar.getInstance()
+            calendar.setTimeInMillis(it)
+            return formatter.format(calendar.getTime())
+        }
+        return null
     }
 
 }
@@ -101,7 +126,7 @@ class MainActivity : ComponentActivity() {
 fun MainActivityScreen(
     predictionsViewModel: PredictionsViewModel,
     date: String,
-    context: Context
+    updatedDate: (Long?) -> Unit
 ) {
 
     var isInternet = ""
@@ -117,20 +142,23 @@ fun MainActivityScreen(
         }
     }
 
-
     if (predictionItems.isEmpty()) {
         //first time loading
         SureScorePredictionsMain(
             predictionList,
             error,
-            firstTimeLoading = true
+            firstTimeLoading = true,
+            predictionsViewModel,
+            updatedDate
         )
         //return
     } else {
         SureScorePredictionsMain(
             predictionList,
             error,
-            firstTimeLoading = false
+            firstTimeLoading = false,
+            predictionsViewModel,
+            updatedDate
         )
 
 
@@ -150,13 +178,32 @@ fun DefaultPreview() {
 
 @Composable
 fun FirstTimeLoading() {
-    Column(
+    Box(
         modifier = Modifier
             .padding(30.dp)
             .fillMaxSize()
             .wrapContentSize(Alignment.Center)
     ) {
 
-        CircularProgressIndicator(color = colorResource(R.color.colorLightBlue))
+
+        Column {
+            Text(text = "No Predictions Available")
+            //CircularProgressIndicator(color = colorResource(R.color.colorLightBlue), modifier = Modifier.align(CenterHorizontally))
+        }
+
+
+    }
+}
+
+@Composable
+fun NoPredictions() {
+    Box(
+        modifier = Modifier
+            .padding(30.dp)
+            .fillMaxSize()
+            .wrapContentSize(Alignment.Center)
+    ) {
+
+
     }
 }

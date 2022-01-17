@@ -1,7 +1,8 @@
 package faba.app.suretippredictions.uicomponents
 
 
-import android.util.Log
+import android.annotation.SuppressLint
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
@@ -17,11 +18,11 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.SaveableStateHolder
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -31,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -41,6 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.decode.SvgDecoder
+import com.google.android.material.datepicker.MaterialDatePicker
 import faba.app.suretippredictions.Constants
 import faba.app.suretippredictions.Constants.COLLAPSE_ANIMATION_DURATION
 import faba.app.suretippredictions.Constants.EXPAND_ANIMATION_DURATION
@@ -51,11 +52,13 @@ import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.screens.AllGamesScreen
 import faba.app.suretippredictions.screens.FavoritesScreen
 import faba.app.suretippredictions.screens.PredictionsScreen
+import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalMaterialApi
@@ -63,7 +66,9 @@ import java.util.*
 fun SureScorePredictionsMain(
     predictionList: List<Prediction>,
     error: String,
-    firstTimeLoading: Boolean
+    firstTimeLoading: Boolean,
+    predictionsViewModel: PredictionsViewModel,
+    updatedDate: (Long?) -> Unit
 ) {
 
     var appTitle by remember { mutableStateOf("") }
@@ -71,11 +76,16 @@ fun SureScorePredictionsMain(
     val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
     val coroutineScope = rememberCoroutineScope()
     val navController = rememberNavController()
+    val saveableStateHolder = rememberSaveableStateHolder()
+
     val items = listOf(
         NavigationItem.AllGames,
         NavigationItem.Main,
         NavigationItem.Favorites
     )
+
+    val activity = LocalContext.current as AppCompatActivity
+
 
     Scaffold(
         topBar = {
@@ -85,32 +95,40 @@ fun SureScorePredictionsMain(
 
                     when (topAppBarIconsName) {
                         NavigationItem.AllGames.name, NavigationItem.Main.name -> {
-
-                            IconButton(onClick = { /* doSomething() */ }) {
-                                Icon(
-                                    Icons.Filled.Search,
-                                    contentDescription = "Localized description"
+                            IconButton(onClick = {
+                                showDatePicker(
+                                    activity,
+                                    updatedDate,
+                                    predictionsViewModel,
+                                    saveableStateHolder
                                 )
-                            }
+                            }) {
 
-                            IconButton(onClick = { /* doSomething() */ }) {
-                                Icon(
-                                    painterResource(id = R.drawable.outline_calendar_today_white_24),
-                                    contentDescription = "Calendar",
-                                    modifier = Modifier.size(20.dp)
+                                Box() {
+                                    Icon(
+                                        painterResource(id = R.drawable.outline_calendar_today_white_24),
+                                        contentDescription = "Calendar",
+                                        modifier = Modifier.size(25.dp)
 
-                                )
+                                    )
+                                    Text(
+                                        text = DateFormaterDayOnly(predictionsViewModel.getLastSelectedDate.value)!!,
+                                        fontSize = 11.sp,
+                                        modifier = Modifier
+                                            .align(
+                                                Alignment.BottomCenter
+                                            )
+                                            .padding(bottom = 2.dp),
+                                        color = Color.White,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+
                             }
 
 
                         }
                         NavigationItem.Favorites.name -> {
-                            IconButton(onClick = { /* doSomething() */ }) {
-                                Icon(
-                                    Icons.Filled.Search,
-                                    contentDescription = "Localized description"
-                                )
-                            }
                         }
                     }
 
@@ -119,6 +137,7 @@ fun SureScorePredictionsMain(
             )
         },
         bottomBar = {
+
             BottomNavigationBar(
                 items = items,
                 navController = navController,
@@ -133,7 +152,7 @@ fun SureScorePredictionsMain(
                 }
             )
 
-            Divider(color = Color.DarkGray, thickness = 1.dp)
+
         },
         scaffoldState = scaffoldState,
         snackbarHost = {
@@ -156,7 +175,9 @@ fun SureScorePredictionsMain(
             predictionList,
             onSetAppTitle = { appTitle = it },
             topAppBarIconsName = { topAppBarIconsName = it },
-            firstTimeLoading
+            firstTimeLoading,
+            predictionsViewModel,
+            saveableStateHolder
         )
 
         if (error.isNotEmpty()) {
@@ -186,16 +207,25 @@ fun Navigation(
     predictionList: List<Prediction>,
     onSetAppTitle: (String) -> Unit,
     topAppBarIconsName: (String) -> Unit,
-    firstTimeLoading: Boolean
+    firstTimeLoading: Boolean,
+    predictionsViewModel: PredictionsViewModel,
+    saveableStateHolder: SaveableStateHolder
 ) {
+
+
     NavHost(navController = navController, startDestination = NavigationItem.Main.route) {
         composable(NavigationItem.AllGames.route) {
-            AllGamesScreen(
-                predictionList,
-                onSetAppTitle,
-                topAppBarIconsName,
-                firstTimeLoading
-            )
+
+            saveableStateHolder.SaveableStateProvider(key = NavigationItem.AllGames.route) {
+                AllGamesScreen(
+                    predictionList,
+                    onSetAppTitle,
+                    topAppBarIconsName,
+                    firstTimeLoading,
+                    predictionsViewModel
+                )
+            }
+
         }
         composable(NavigationItem.Main.route) {
 
@@ -205,20 +235,26 @@ fun Navigation(
                 }
             }
 
-            PredictionsScreen(
-                filteredList,
-                onSetAppTitle,
-                topAppBarIconsName,
-                firstTimeLoading
-            )
+            saveableStateHolder.SaveableStateProvider(key = NavigationItem.Main.route) {
+                PredictionsScreen(
+                    filteredList,
+                    onSetAppTitle,
+                    topAppBarIconsName,
+                    firstTimeLoading,
+                    predictionsViewModel
+                )
+            }
         }
         composable(NavigationItem.Favorites.route) {
-            FavoritesScreen(
-                predictionList,
-                onSetAppTitle,
-                topAppBarIconsName,
-                firstTimeLoading
-            )
+            saveableStateHolder.SaveableStateProvider(key = NavigationItem.Favorites.route) {
+                FavoritesScreen(
+                    predictionList,
+                    onSetAppTitle,
+                    topAppBarIconsName,
+                    firstTimeLoading,
+                    predictionsViewModel
+                )
+            }
         }
     }
 }
@@ -227,18 +263,18 @@ fun Navigation(
 @Composable
 fun BottomNavigationBar(
     items: List<NavigationItem>,
-    navController: NavController,
+    navController: NavHostController,
     modifier: Modifier = Modifier,
     onItemClick: (NavigationItem) -> Unit
 ) {
-    val backStackEntry = navController.currentBackStackEntryAsState()
+    val backStackEntry by navController.currentBackStackEntryAsState()
     BottomNavigation(
         modifier = modifier,
         backgroundColor = colorResource(R.color.dark_mode),
         elevation = 20.dp
     ) {
         items.forEach { item ->
-            val selected = item.route == backStackEntry.value?.destination?.route
+            val selected = item.route == backStackEntry?.destination?.route
             BottomNavigationItem(
                 selected = selected,
                 onClick = { onItemClick(item) },
@@ -838,6 +874,30 @@ fun PredictionListItemDark(
 
 }
 
+
+private fun showDatePicker(
+    activity: AppCompatActivity,
+    updatedDate: (Long?) -> Unit,
+    predictionsViewModel: PredictionsViewModel,
+    saveableStateHolder: SaveableStateHolder
+) {
+    val builder = MaterialDatePicker.Builder.datePicker()
+    builder.setSelection(
+        predictionsViewModel.getLastSelectedDate.value
+    )
+    val picker = builder.build()
+    picker.show(activity.supportFragmentManager, picker.toString())
+    picker.addOnPositiveButtonClickListener {
+        saveableStateHolder.removeState(NavigationItem.Main.route)
+        saveableStateHolder.removeState(NavigationItem.AllGames.route)
+        saveableStateHolder.removeState(NavigationItem.Favorites.route)
+        updatedDate(it)
+        predictionsViewModel.loading.value = true
+        predictionsViewModel.getLastSelectedDate.value = it
+
+    }
+}
+
 fun formatGameTime(gameTime: String): String {
 
     val df = SimpleDateFormat("HH:mm", Locale.ENGLISH)
@@ -846,6 +906,17 @@ fun formatGameTime(gameTime: String): String {
     df.timeZone = TimeZone.getDefault()
     return df.format(date)
 
+}
+
+@SuppressLint("SimpleDateFormat")
+fun DateFormaterDayOnly(milliseconds: Long?): String? {
+    milliseconds?.let {
+        val formatter = SimpleDateFormat("dd")
+        val calendar: Calendar = Calendar.getInstance()
+        calendar.setTimeInMillis(it)
+        return formatter.format(calendar.getTime())
+    }
+    return null
 }
 
 /*@Composable

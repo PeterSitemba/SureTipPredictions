@@ -4,6 +4,18 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id("com.apollographql.apollo").version("$apollo_version")
+    id 'com.google.devtools.ksp' version '1.6.10-1.0.2'
+}
+
+kotlin {
+    sourceSets {
+        debug {
+            kotlin.srcDir("build/generated/ksp/debug/kotlin")
+        }
+        release {
+            kotlin.srcDir("build/generated/ksp/release/kotlin")
+        }
+    }
 }
 
 android {
@@ -29,6 +41,9 @@ android {
         }
     }
     compileOptions {
+
+        coreLibraryDesugaringEnabled true
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -52,14 +67,14 @@ android {
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.4.0'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.5.0'
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "androidx.compose.runtime:runtime:$compose_version"
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.activity:activity-compose:$activity_compose_version"
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-rc02"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
     implementation project(path: ':core')
@@ -81,8 +96,8 @@ dependencies {
 
     // Networking
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.okhttp3:okhttp:4.9.3"
-    implementation "com.squareup.okhttp3:logging-interceptor:4.9.3"
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.3'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.3'
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
 
     // Room components
@@ -113,12 +128,19 @@ dependencies {
     api "com.apollographql.apollo:apollo-runtime:$apollo_version"
     api "com.apollographql.apollo:apollo-coroutines-support:$apollo_version"
 
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
-    api 'com.google.code.gson:gson:2.8.6'
+    implementation('com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.3')
+    api 'com.google.code.gson:gson:2.8.9'
 
     //accompanyst api
     implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
 
     //splash screen api
-    implementation 'androidx.core:core-splashscreen:1.0.0-alpha02'
+    implementation 'androidx.core:core-splashscreen:1.0.0-beta01'
+    implementation "io.github.raamcosta.compose-destinations:core:$ramcosta_navigation"
+    ksp "io.github.raamcosta.compose-destinations:ksp:$ramcosta_navigation"
+
+    implementation "io.github.vanpra.compose-material-dialogs:core:0.6.2"
+    implementation "io.github.vanpra.compose-material-dialogs:datetime:0.6.2"
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 }
