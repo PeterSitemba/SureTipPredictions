@@ -41,6 +41,8 @@ import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.decode.SvgDecoder
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import faba.app.suretippredictions.Constants
 import faba.app.suretippredictions.Constants.COLLAPSE_ANIMATION_DURATION
@@ -66,7 +68,6 @@ import java.util.*
 fun SureScorePredictionsMain(
     predictionList: List<Prediction>,
     error: String,
-    firstTimeLoading: Boolean,
     predictionsViewModel: PredictionsViewModel,
     updatedDate: (Long?) -> Unit
 ) {
@@ -85,7 +86,6 @@ fun SureScorePredictionsMain(
     )
 
     val activity = LocalContext.current as AppCompatActivity
-
 
     Scaffold(
         topBar = {
@@ -175,7 +175,6 @@ fun SureScorePredictionsMain(
             predictionList,
             onSetAppTitle = { appTitle = it },
             topAppBarIconsName = { topAppBarIconsName = it },
-            firstTimeLoading,
             predictionsViewModel,
             saveableStateHolder
         )
@@ -207,12 +206,9 @@ fun Navigation(
     predictionList: List<Prediction>,
     onSetAppTitle: (String) -> Unit,
     topAppBarIconsName: (String) -> Unit,
-    firstTimeLoading: Boolean,
     predictionsViewModel: PredictionsViewModel,
     saveableStateHolder: SaveableStateHolder
 ) {
-
-
     NavHost(navController = navController, startDestination = NavigationItem.Main.route) {
         composable(NavigationItem.AllGames.route) {
 
@@ -221,7 +217,6 @@ fun Navigation(
                     predictionList,
                     onSetAppTitle,
                     topAppBarIconsName,
-                    firstTimeLoading,
                     predictionsViewModel
                 )
             }
@@ -240,7 +235,6 @@ fun Navigation(
                     filteredList,
                     onSetAppTitle,
                     topAppBarIconsName,
-                    firstTimeLoading,
                     predictionsViewModel
                 )
             }
@@ -251,7 +245,6 @@ fun Navigation(
                     predictionList,
                     onSetAppTitle,
                     topAppBarIconsName,
-                    firstTimeLoading,
                     predictionsViewModel
                 )
             }
@@ -881,10 +874,32 @@ private fun showDatePicker(
     predictionsViewModel: PredictionsViewModel,
     saveableStateHolder: SaveableStateHolder
 ) {
-    val builder = MaterialDatePicker.Builder.datePicker()
-    builder.setSelection(
-        predictionsViewModel.getLastSelectedDate.value
-    )
+
+    val today = MaterialDatePicker.todayInUtcMilliseconds()
+    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+
+    calendar.timeInMillis = today
+    calendar[Calendar.MONTH] = Calendar.JANUARY - 1
+    val dec = calendar.timeInMillis
+
+    calendar.timeInMillis = today
+    calendar[Calendar.MONTH] = Calendar.JANUARY
+    val jan = calendar.timeInMillis
+
+
+
+    val constraintsBuilder =
+        CalendarConstraints.Builder().setValidator(DateValidatorPointBackward.now())
+
+    constraintsBuilder.setStart(dec)
+    constraintsBuilder.setEnd(jan)
+    val builder = MaterialDatePicker.Builder.datePicker().apply {
+        setSelection(predictionsViewModel.getLastSelectedDate.value)
+        setCalendarConstraints(constraintsBuilder.build())
+    }
+
+
+
     val picker = builder.build()
     picker.show(activity.supportFragmentManager, picker.toString())
     picker.addOnPositiveButtonClickListener {
@@ -892,9 +907,7 @@ private fun showDatePicker(
         saveableStateHolder.removeState(NavigationItem.AllGames.route)
         saveableStateHolder.removeState(NavigationItem.Favorites.route)
         updatedDate(it)
-        predictionsViewModel.loading.value = true
         predictionsViewModel.getLastSelectedDate.value = it
-
     }
 }
 

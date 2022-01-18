@@ -34,7 +34,7 @@ class Apollo(private val context: Context) {
                 //Adding HttpLoggingInterceptor() to see the response body and the results.
                 .connectTimeout(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                 .readTimeout(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                .addInterceptor(getLoggingInterceptor())
+                //.addInterceptor(getLoggingInterceptor())
                 .addInterceptor(AuthorizationInterceptor())
                 .addInterceptor(NetworkConnectionInterceptor(context))
                 .build()

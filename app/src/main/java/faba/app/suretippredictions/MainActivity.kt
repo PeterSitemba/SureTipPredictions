@@ -2,17 +2,20 @@ package faba.app.suretippredictions
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,6 +29,7 @@ import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.uicomponents.SureScorePredictionsMain
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,7 +45,8 @@ class MainActivity : AppCompatActivity() {
 
         installSplashScreen().apply {
             this.setKeepOnScreenCondition {
-                predictionsViewModel.loading.value!!
+                false
+                //predictionsViewModel.loading.value!!
             }
         }
 
@@ -51,14 +56,13 @@ class MainActivity : AppCompatActivity() {
         //val currentDate = "2022-01-11"
 
 
-
         setContent {
 
-            var datePicked : String? by remember {
+            var datePicked: String? by remember {
                 mutableStateOf(currentDate)
             }
 
-            val updatedDate = { date : Long? ->
+            val updatedDate = { date: Long? ->
                 datePicked = DateFormater(date) ?: currentDate
             }
 
@@ -77,7 +81,6 @@ class MainActivity : AppCompatActivity() {
 
             updatePredictions(datePicked!!)
 
-
         }
     }
 
@@ -85,12 +88,16 @@ class MainActivity : AppCompatActivity() {
 
         //get pred number from server and use it to update local db if number is less than db
 
-        predictionsViewModel.getPredictionsRowCount(date)?.observe(this, { pred ->
-            if (pred == 0) {
-                predictionsViewModel.listPredictions(date)
+        lifecycleScope.launch {
+            predictionsViewModel.getPredictionsRowCount(date)?.collect {
+                Log.e("Number is", it.toString())
+                if (it == 0) {
+                    predictionsViewModel.listPredictions(date)
+                } else {
+                    predictionsViewModel.apiSize.value = 0
+                }
             }
-        })
-
+        }
 
     }
 
@@ -107,8 +114,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SimpleDateFormat")
-    fun DateFormater(milliseconds : Long?) : String?{
-        milliseconds?.let{
+    fun DateFormater(milliseconds: Long?): String? {
+        milliseconds?.let {
             val formatter = SimpleDateFormat("yyyy-MM-dd")
             val calendar: Calendar = Calendar.getInstance()
             calendar.setTimeInMillis(it)
@@ -132,7 +139,7 @@ fun MainActivityScreen(
     var isInternet = ""
 
     val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
-        .observeAsState(listOf())
+        .collectAsState(listOf())
 
     val error by predictionsViewModel.errorMessage.observeAsState("")
 
@@ -142,28 +149,12 @@ fun MainActivityScreen(
         }
     }
 
-    if (predictionItems.isEmpty()) {
-        //first time loading
-        SureScorePredictionsMain(
-            predictionList,
-            error,
-            firstTimeLoading = true,
-            predictionsViewModel,
-            updatedDate
-        )
-        //return
-    } else {
-        SureScorePredictionsMain(
-            predictionList,
-            error,
-            firstTimeLoading = false,
-            predictionsViewModel,
-            updatedDate
-        )
-
-
-    }
-
+    SureScorePredictionsMain(
+        predictionList,
+        error,
+        predictionsViewModel,
+        updatedDate
+    )
 
 }
 
@@ -175,24 +166,36 @@ fun DefaultPreview() {
     }
 }
 
-
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun FirstTimeLoading() {
+fun isEmpty() {
+
+    val coroutineScope = rememberCoroutineScope()
     Box(
         modifier = Modifier
             .padding(30.dp)
             .fillMaxSize()
             .wrapContentSize(Alignment.Center)
     ) {
-
-
         Column {
-            Text(text = "No Predictions Available")
-            //CircularProgressIndicator(color = colorResource(R.color.colorLightBlue), modifier = Modifier.align(CenterHorizontally))
+            Text(text = "Predictions Unavailable")
         }
+    }
+}
 
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+fun ProgressDialog() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CircularProgressIndicator(
+            color = colorResource(R.color.colorLightBlue)
+        )
 
     }
+
 }
 
 @Composable

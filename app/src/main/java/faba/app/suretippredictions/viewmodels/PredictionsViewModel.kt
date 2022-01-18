@@ -1,5 +1,6 @@
 package faba.app.suretippredictions.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
@@ -14,6 +15,7 @@ import faba.app.suretippredictions.models.odds.Bookmaker
 import faba.app.suretippredictions.models.predictions.*
 import faba.app.suretippredictions.repository.PredictionsRepository
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import java.util.*
 import javax.inject.Inject
 
@@ -32,6 +34,10 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     val errorMessage = MutableLiveData<String>()
     val loading = MutableLiveData<Boolean>()
     val getLastSelectedDate = MutableLiveData<Long>()
+    val status = MutableLiveData<String>()
+    val apiSize = MutableLiveData<Int>()
+
+
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         onError("Exception handled: ${throwable.localizedMessage}")
@@ -39,16 +45,17 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     }
 
     init {
-
         loading.value = true
+        apiSize.value = 0
         getLastSelectedDate.value = Calendar.getInstance().timeInMillis
     }
 
 
     fun listPredictions(date: String) {
+        //loading.value = true
         val predictionList = mutableListOf<Prediction>()
+        apiSize.value = 1
         viewModelScope.launch {
-            loading.postValue(true)
             withContext(Dispatchers.IO + exceptionHandler) {
                 try {
 
@@ -167,27 +174,24 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
                     }
 
-
-                    if (predictionList.size == 0) {
-                        withContext(Dispatchers.Main) {
-                            loading.value = false
-                            //Log.e("First time loading" , firstTimeLoading.value.toString())
-                        }
-                    }
+                    Log.e("Size ", predictionList.size.toString())
 
                     predictionList.let {
                         repository.insertPrediction(it)
                     }
 
-                    updatePredictionOdds(date)
-                    updatePrediction(date)
 
 
-                    /* withContext(Dispatchers.Main) {
-                         predCounterResponse.value = predCounter
-                         oddCounterResponse.value = oddCounter
-                     }
-     */
+                    withContext(Dispatchers.Main) {
+                        apiSize.value = predictionList.size
+                        if(predictionList.size == 0) loading.value = false
+
+                    }
+
+                    withContext(Dispatchers.IO){
+                        updatePredictionOdds(date)
+                    }
+
                 } catch (e: ApiException) {
                     onError("Something went wrong.\nCheck your internet connection")
                 } catch (e: NoInternetException) {
@@ -249,7 +253,6 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                         }
 
                     }
-
 
                     predictionUpdateList.let {
                         repository.updatePrediction(it)
@@ -313,6 +316,11 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                         repository.updatePredictionOdds(it)
                     }
 
+                    withContext(Dispatchers.IO){
+                        updatePrediction(date)
+                    }
+
+
                 } catch (e: ApiException) {
                     onError("Something went wrong.\nCheck your internet connection")
                 } catch (e: NoInternetException) {
@@ -327,14 +335,14 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     }
 
 
-    fun roomPredictionsList(date: String): LiveData<List<Prediction>> {
-        loading.postValue(false)
-        return repository.roomPredictionsList(date).asLiveData()
+    fun roomPredictionsList(date: String): Flow<List<Prediction>> {
+        loading.value = false
+        return repository.roomPredictionsList(date)
     }
 
-    fun getPredictionsRowCount(date: String): LiveData<Int?>? {
-        loading.postValue(true)
-        return repository.getPredictionsRowCount(date)?.asLiveData()
+    fun getPredictionsRowCount(date: String): Flow<Int?>? {
+        loading.value = true
+        return repository.getPredictionsRowCount(date)
     }
 
     private fun onError(message: String) {
