@@ -7,9 +7,12 @@ import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import faba.app.core.ApiException
 import faba.app.core.NoInternetException
+import faba.app.suretippredictions.Constants
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.database.PredictionUpdate
 import faba.app.suretippredictions.database.PredictionUpdateOdds
+import faba.app.suretippredictions.di.IoDispatcher
+import faba.app.suretippredictions.di.MainDispatcher
 import faba.app.suretippredictions.models.fixtures.Goals
 import faba.app.suretippredictions.models.odds.Bookmaker
 import faba.app.suretippredictions.models.predictions.*
@@ -20,7 +23,11 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class PredictionsViewModel @Inject constructor(private val repository: PredictionsRepository) :
+class PredictionsViewModel @Inject constructor(
+    private val repository: PredictionsRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @MainDispatcher private val mainDispatcher: CoroutineDispatcher
+) :
     ViewModel() {
 
     private val gson = Gson()
@@ -36,7 +43,6 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     val getLastSelectedDate = MutableLiveData<Long>()
     val status = MutableLiveData<String>()
     val apiSize = MutableLiveData<Int>()
-
 
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -56,7 +62,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
         val predictionList = mutableListOf<Prediction>()
         apiSize.value = 1
         viewModelScope.launch {
-            withContext(Dispatchers.IO + exceptionHandler) {
+            withContext(ioDispatcher + exceptionHandler) {
                 try {
 
                     var response = repository.listPredictions(date, "")
@@ -182,22 +188,22 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
 
 
 
-                    withContext(Dispatchers.Main) {
+                    withContext(mainDispatcher) {
                         apiSize.value = predictionList.size
-                        if(predictionList.size == 0) loading.value = false
+                        if (predictionList.size == 0) loading.value = false
 
                     }
 
-                    withContext(Dispatchers.IO){
+                    withContext(ioDispatcher) {
                         updatePredictionOdds(date)
                     }
 
                 } catch (e: ApiException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 } catch (e: NoInternetException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 } catch (e: ApolloException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
 
                 }
             }
@@ -207,7 +213,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     fun updatePrediction(date: String) {
         val predictionUpdateList = mutableListOf<PredictionUpdate>()
         viewModelScope.launch {
-            withContext(Dispatchers.IO + exceptionHandler) {
+            withContext(ioDispatcher + exceptionHandler) {
                 try {
                     var response = repository.getFixtures(date, "")
 
@@ -259,11 +265,11 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                     }
 
                 } catch (e: NoInternetException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 } catch (e: ApolloException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 } catch (e: ApiException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 }
 
             }
@@ -274,7 +280,7 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
     fun updatePredictionOdds(date: String) {
         val predictionUpdateOddsList = mutableListOf<PredictionUpdateOdds>()
         viewModelScope.launch {
-            withContext(Dispatchers.IO + exceptionHandler) {
+            withContext(ioDispatcher + exceptionHandler) {
                 try {
                     var response = repository.listOdds(date, "")
 
@@ -316,17 +322,17 @@ class PredictionsViewModel @Inject constructor(private val repository: Predictio
                         repository.updatePredictionOdds(it)
                     }
 
-                    withContext(Dispatchers.IO){
+                    withContext(ioDispatcher) {
                         updatePrediction(date)
                     }
 
 
                 } catch (e: ApiException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 } catch (e: NoInternetException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 } catch (e: ApolloException) {
-                    onError("Something went wrong.\nCheck your internet connection")
+                    onError(Constants.internetError)
                 }
 
             }

@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,7 +28,6 @@ import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.uicomponents.SureScorePredictionsMain
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,7 +35,8 @@ import java.util.*
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
-class MainActivity : AppCompatActivity() {
+class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO) :
+    AppCompatActivity() {
     private val predictionsViewModel: PredictionsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,7 +102,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updatePredictions(date: String): Job {
         return lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 //predictionsViewModel.updatePrediction("2021-12-04")
                 while (true) {
                     predictionsViewModel.updatePrediction(date)
@@ -135,8 +134,6 @@ fun MainActivityScreen(
     date: String,
     updatedDate: (Long?) -> Unit
 ) {
-
-    var isInternet = ""
 
     val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
         .collectAsState(listOf())
@@ -170,7 +167,6 @@ fun DefaultPreview() {
 @Composable
 fun isEmpty() {
 
-    val coroutineScope = rememberCoroutineScope()
     Box(
         modifier = Modifier
             .padding(30.dp)

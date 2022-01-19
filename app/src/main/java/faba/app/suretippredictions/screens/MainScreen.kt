@@ -2,30 +2,19 @@ package faba.app.suretippredictions.screens
 
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import coil.annotation.ExperimentalCoilApi
 import faba.app.suretippredictions.ProgressDialog
-import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.isEmpty
 import faba.app.suretippredictions.uicomponents.CollapsableLazyColumn
 import faba.app.suretippredictions.uicomponents.NavigationItem
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @SuppressLint("CoroutineCreationDuringComposition")

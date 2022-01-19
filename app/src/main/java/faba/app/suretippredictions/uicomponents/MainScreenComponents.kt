@@ -16,7 +16,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -749,10 +748,10 @@ fun PredictionListItemDark(
                     Column(
                         modifier = Modifier.width(100.dp)
                     ) {
-                        var goals: String = if (prediction.goals?.home == null) {
+                        val goals: String = if (prediction.goals?.home == null) {
                             "VS"
                         } else {
-                            "${prediction.goals?.home} - ${prediction.goals?.away}"
+                            "${prediction.goals.home} - ${prediction.goals.away}"
                         }
 
                         Text(

@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import faba.app.suretippredictions.Constants
 import faba.app.suretippredictions.database.PredictionsDao
 import faba.app.suretippredictions.database.PredictionsRoomDatabase
 import faba.app.suretippredictions.repository.PredictionsRepository
@@ -40,5 +41,4 @@ object AppModule {
     @Singleton
     @Provides
     fun providePredictionsDao(db: PredictionsRoomDatabase) = db.PredictionsDao()
-
 }

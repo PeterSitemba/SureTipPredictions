@@ -1,8 +1,12 @@
 package faba.app.suretippredictions
 
+
 object Constants {
     const val URL: String =
         "https://fqq4pp5xhjbijggrrxnsl62szq.appsync-api.me-south-1.amazonaws.com/graphql/"
+
+    const val internetError: String =
+        "Something went wrong.\nCheck your internet connection"
 
     val mainLeaguesList: List<Int> = arrayListOf(39, 61, 78, 88, 135, 140, 173, 421, 847, 432, 441, 149, 430, 383)
 
