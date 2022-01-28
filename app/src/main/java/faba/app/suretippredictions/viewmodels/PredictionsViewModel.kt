@@ -28,24 +28,33 @@ class PredictionsViewModel @Inject constructor(
     private val repository: PredictionsRepository,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val gson = Gson()
 
-    val predictionListResponse = MutableLiveData<MutableList<Prediction>>()
+    val loading: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
 
+    val errorMessage: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
+    }
 
-    val predCounterResponse = MutableLiveData<Int>()
-    val oddCounterResponse = MutableLiveData<Int>()
+    val getLastSelectedDate: MutableLiveData<Long> by lazy {
+        MutableLiveData<Long>()
+    }
 
-    val errorMessage = MutableLiveData<String>()
-    val loading = MutableLiveData<Boolean>()
-    val getLastSelectedDate = MutableLiveData<Long>()
-    val status = MutableLiveData<String>()
-    val apiSize = MutableLiveData<Int>()
-    val localSize = MutableLiveData<Int>()
+    val status: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
+    }
 
+    val apiSize: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
+    }
+
+    val localSize: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
+    }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         onError("Exception handled: ${throwable.localizedMessage}")
@@ -61,7 +70,6 @@ class PredictionsViewModel @Inject constructor(
 
 
     fun listPredictions(date: String) {
-        //loading.value = true
         onError("")
         val predictionList = mutableListOf<Prediction>()
         apiSize.value = 1
@@ -357,6 +365,5 @@ class PredictionsViewModel @Inject constructor(
         errorMessage.postValue(message)
         loading.postValue(false)
     }
-
 
 }

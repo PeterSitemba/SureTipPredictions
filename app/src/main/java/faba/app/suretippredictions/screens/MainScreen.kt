@@ -35,8 +35,6 @@ fun PredictionsScreen(
     onSetAppTitle("SureScore Predictions")
     onTopAppBarIconsName(NavigationItem.Main.name)
 
-    //Log.e("loading viewmodel", predictionsViewModel.loading.value.toString())
-
     val loading = predictionsViewModel.loading.observeAsState(true).value
     val apiSize = predictionsViewModel.apiSize.observeAsState(0).value
 
