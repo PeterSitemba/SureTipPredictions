@@ -44,33 +44,31 @@ fun PredictionsScreen(
 
     if (prediction.isEmpty() && !NetworkConnectionInterceptor(LocalContext.current).isNetworkAvailable()) {
         NoInternetConnection()
-    } else if (loading || (prediction.isEmpty() && apiSize > 0)) {
+    } else if (loading || (prediction.isEmpty() && apiSize > 0) || (prediction.isEmpty() && predictionsViewModel.localSize.value!! > 0)) {
         ProgressDialog()
+    } else if (prediction.isEmpty() && predictionsViewModel.localSize.value == 0) {
+        IsEmpty()
     } else {
-        if (prediction.isEmpty()) {
-            IsEmpty()
-        } else {
-            val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
-            val listState = rememberLazyListState()
+        val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
+        val listState = rememberLazyListState()
 
-            val leagues = groupedLeaguesNo.toList()
-                .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
+        val leagues = groupedLeaguesNo.toList()
+            .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
 
-            val collapsedState =
-                rememberSaveable {
-                    leagues.map {
-                        mutableStateOf(false)
-                    }
+        val collapsedState =
+            rememberSaveable {
+                leagues.map {
+                    mutableStateOf(false)
                 }
+            }
 
-            CollapsableLazyColumn(
-                leagues,
-                listState,
-                collapsedState
-            )
-        }
-
+        CollapsableLazyColumn(
+            leagues,
+            listState,
+            collapsedState
+        )
     }
+
 
 /*
     if (firstTimeLoading) {

@@ -2,6 +2,7 @@ package faba.app.suretippredictions.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +44,7 @@ class PredictionsViewModel @Inject constructor(
     val getLastSelectedDate = MutableLiveData<Long>()
     val status = MutableLiveData<String>()
     val apiSize = MutableLiveData<Int>()
+    val localSize = MutableLiveData<Int>()
 
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -53,6 +55,7 @@ class PredictionsViewModel @Inject constructor(
     init {
         loading.value = true
         apiSize.value = 0
+        localSize.value = 0
         getLastSelectedDate.value = Calendar.getInstance().timeInMillis
     }
 
@@ -341,7 +344,6 @@ class PredictionsViewModel @Inject constructor(
 
 
     fun roomPredictionsList(date: String): Flow<List<Prediction>> {
-        Log.e("PredviewModel", " False here")
         loading.value = false
         return repository.roomPredictionsList(date)
     }

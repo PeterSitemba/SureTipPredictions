@@ -99,6 +99,7 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
         //get pred number from server and use it to update local db if number is less than db
         lifecycleScope.launch {
             predictionsViewModel.getPredictionsRowCount(date)?.collect {
+                predictionsViewModel.localSize.value = it
                 Log.e("Number is", it.toString())
                 if (it == 0) {
                     predictionsViewModel.listPredictions(date)

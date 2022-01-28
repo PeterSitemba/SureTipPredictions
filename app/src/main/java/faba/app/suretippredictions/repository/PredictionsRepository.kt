@@ -38,6 +38,7 @@ class PredictionsRepository @Inject constructor(
 
 
     fun roomPredictionsList(date: String) = predictionsDao.getAllPredictionsDistinct(date)
+
     fun getPredictionsRowCount(date: String) = predictionsDao.getRowCountPredTableDistinct(date)
 
 
