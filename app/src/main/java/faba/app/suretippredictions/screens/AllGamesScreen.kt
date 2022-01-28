@@ -6,10 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
 import faba.app.suretippredictions.IsEmpty
+import faba.app.suretippredictions.NoInternetConnection
 import faba.app.suretippredictions.ProgressDialog
 import faba.app.suretippredictions.database.Prediction
+import faba.app.suretippredictions.service.NetworkConnectionInterceptor
 import faba.app.suretippredictions.uicomponents.CollapsableLazyColumn
 import faba.app.suretippredictions.uicomponents.NavigationItem
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
@@ -32,7 +35,9 @@ fun AllGamesScreen(
 
 
 
-    if (loading || apiSize > 0 || (prediction.isEmpty() && apiSize > 0)) {
+    if (prediction.isEmpty() && !NetworkConnectionInterceptor(LocalContext.current).isNetworkAvailable()) {
+        NoInternetConnection()
+    } else if (loading || (prediction.isEmpty() && apiSize > 0)) {
         ProgressDialog()
     } else {
         if (prediction.isEmpty()) {

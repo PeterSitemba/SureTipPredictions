@@ -59,6 +59,7 @@ class PredictionsViewModel @Inject constructor(
 
     fun listPredictions(date: String) {
         //loading.value = true
+        onError("")
         val predictionList = mutableListOf<Prediction>()
         apiSize.value = 1
         viewModelScope.launch {
@@ -340,6 +341,7 @@ class PredictionsViewModel @Inject constructor(
 
 
     fun roomPredictionsList(date: String): Flow<List<Prediction>> {
+        Log.e("PredviewModel", " False here")
         loading.value = false
         return repository.roomPredictionsList(date)
     }

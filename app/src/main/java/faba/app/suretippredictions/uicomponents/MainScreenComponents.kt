@@ -2,6 +2,7 @@ package faba.app.suretippredictions.uicomponents
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -188,7 +189,7 @@ fun SureScorePredictionsMain(
                 val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
                     message = error,
                     actionLabel = "Refresh",
-                    duration = SnackbarDuration.Indefinite
+                    duration = SnackbarDuration.Long
                 )
 
                 when (snackbarResult) {

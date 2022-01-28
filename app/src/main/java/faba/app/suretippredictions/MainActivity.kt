@@ -180,6 +180,22 @@ fun IsEmpty() {
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
+fun NoInternetConnection() {
+
+    Box(
+        modifier = Modifier
+            .padding(30.dp)
+            .fillMaxSize()
+            .wrapContentSize(Alignment.Center)
+    ) {
+        Column {
+            Text(text = "No Internet Connection")
+        }
+    }
+}
+
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
 fun ProgressDialog() {
     Box(
         contentAlignment = Alignment.Center,
