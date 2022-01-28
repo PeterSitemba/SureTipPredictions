@@ -24,8 +24,11 @@ import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import faba.app.suretippredictions.database.Prediction
+import faba.app.suretippredictions.service.NetworkConnectionInterceptor
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
 import faba.app.suretippredictions.uicomponents.SureScorePredictionsMain
+import faba.app.suretippredictions.utils.DateUtil
+import faba.app.suretippredictions.utils.DateUtil.DateFormater
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
@@ -39,6 +42,7 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
     AppCompatActivity() {
     private val predictionsViewModel: PredictionsViewModel by viewModels()
 
+    @SuppressLint("SimpleDateFormat")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,17 +56,25 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
         val sdf = SimpleDateFormat("yyyy-MM-dd")
 
         val currentDate = sdf.format(Date())
+        updatePredictions(DateFormater(predictionsViewModel.getLastSelectedDate.value)!!)
+
         //val currentDate = "2022-01-11"
 
 
         setContent {
 
-            var datePicked: String? by remember {
+            var datePicked: String by remember {
                 mutableStateOf(currentDate)
             }
 
             val updatedDate = { date: Long? ->
                 datePicked = DateFormater(date) ?: currentDate
+
+                if (updatePredictions(datePicked).isActive) {
+                    updatePredictions(datePicked).cancel()
+                    updatePredictions(datePicked)
+                }
+
             }
 
 
@@ -72,13 +84,12 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
             )
 
             SureTipPredictionsTheme(true) {
-                MainActivityScreen(predictionsViewModel, datePicked!!, updatedDate)
+                MainActivityScreen(predictionsViewModel, datePicked, updatedDate)
 
             }
 
-            iniObservables(datePicked!!)
+            iniObservables(datePicked)
 
-            updatePredictions(datePicked!!)
 
         }
     }
@@ -86,7 +97,6 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
     private fun iniObservables(date: String) {
 
         //get pred number from server and use it to update local db if number is less than db
-
         lifecycleScope.launch {
             predictionsViewModel.getPredictionsRowCount(date)?.collect {
                 Log.e("Number is", it.toString())
@@ -103,24 +113,14 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
     private fun updatePredictions(date: String): Job {
         return lifecycleScope.launch {
             withContext(ioDispatcher) {
-                //predictionsViewModel.updatePrediction("2021-12-04")
                 while (true) {
-                    predictionsViewModel.updatePrediction(date)
+                    if (NetworkConnectionInterceptor(this@MainActivity).isNetworkAvailable()) {
+                        predictionsViewModel.updatePrediction(date)
+                    }
                     delay(30000)
                 }
             }
         }
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    fun DateFormater(milliseconds: Long?): String? {
-        milliseconds?.let {
-            val formatter = SimpleDateFormat("yyyy-MM-dd")
-            val calendar: Calendar = Calendar.getInstance()
-            calendar.setTimeInMillis(it)
-            return formatter.format(calendar.getTime())
-        }
-        return null
     }
 
 }
@@ -134,9 +134,8 @@ fun MainActivityScreen(
     date: String,
     updatedDate: (Long?) -> Unit
 ) {
-
     val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
-        .collectAsState(listOf())
+        .collectAsState(emptyList())
 
     val error by predictionsViewModel.errorMessage.observeAsState("")
 
@@ -165,7 +164,7 @@ fun DefaultPreview() {
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun isEmpty() {
+fun IsEmpty() {
 
     Box(
         modifier = Modifier

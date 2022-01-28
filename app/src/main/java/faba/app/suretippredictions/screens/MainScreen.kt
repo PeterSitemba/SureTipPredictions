@@ -2,6 +2,7 @@ package faba.app.suretippredictions.screens
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -9,9 +10,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import coil.annotation.ExperimentalCoilApi
+import faba.app.suretippredictions.IsEmpty
 import faba.app.suretippredictions.ProgressDialog
 import faba.app.suretippredictions.database.Prediction
-import faba.app.suretippredictions.isEmpty
 import faba.app.suretippredictions.uicomponents.CollapsableLazyColumn
 import faba.app.suretippredictions.uicomponents.NavigationItem
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
@@ -36,14 +37,13 @@ fun PredictionsScreen(
     val loading = predictionsViewModel.loading.observeAsState(true).value
     val apiSize = predictionsViewModel.apiSize.observeAsState(0).value
 
-    //Log.e("api size", apiSize.toString())
-
+    Log.e("List size ", prediction.size.toString())
 
     if (loading || apiSize > 0 || (prediction.isEmpty() && apiSize > 0)) {
         ProgressDialog()
     } else {
         if (prediction.isEmpty()) {
-            isEmpty()
+            IsEmpty()
         } else {
             val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
             val listState = rememberLazyListState()

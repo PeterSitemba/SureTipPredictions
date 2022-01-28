@@ -7,9 +7,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import coil.annotation.ExperimentalCoilApi
+import faba.app.suretippredictions.IsEmpty
 import faba.app.suretippredictions.ProgressDialog
 import faba.app.suretippredictions.database.Prediction
-import faba.app.suretippredictions.isEmpty
 import faba.app.suretippredictions.uicomponents.CollapsableLazyColumn
 import faba.app.suretippredictions.uicomponents.NavigationItem
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
@@ -34,7 +34,7 @@ fun FavoritesScreen(
         ProgressDialog()
     } else {
         if (prediction.isEmpty()) {
-            isEmpty()
+            IsEmpty()
         } else {
             val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
             val listState = rememberLazyListState()

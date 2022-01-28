@@ -48,12 +48,17 @@ import faba.app.suretippredictions.Constants.COLLAPSE_ANIMATION_DURATION
 import faba.app.suretippredictions.Constants.EXPAND_ANIMATION_DURATION
 import faba.app.suretippredictions.Constants.FADE_IN_ANIMATION_DURATION
 import faba.app.suretippredictions.Constants.FADE_OUT_ANIMATION_DURATION
+import faba.app.suretippredictions.MainActivity
+import faba.app.suretippredictions.MainActivityScreen
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.screens.AllGamesScreen
 import faba.app.suretippredictions.screens.FavoritesScreen
 import faba.app.suretippredictions.screens.PredictionsScreen
+import faba.app.suretippredictions.service.NetworkConnectionInterceptor
+import faba.app.suretippredictions.utils.DateUtil
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -182,12 +187,21 @@ fun SureScorePredictionsMain(
             coroutineScope.launch {
                 val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
                     message = error,
-                    actionLabel = "Refresh"
+                    actionLabel = "Refresh",
+                    duration = SnackbarDuration.Indefinite
                 )
 
                 when (snackbarResult) {
                     SnackbarResult.ActionPerformed -> {
-
+                        if (NetworkConnectionInterceptor(activity).isNetworkAvailable()) {
+                            predictionsViewModel.listPredictions(
+                                DateUtil.DateFormater(
+                                    predictionsViewModel.getLastSelectedDate.value
+                                )!!
+                            )
+                        }
+                    }
+                    else -> { //empty
                     }
                 }
             }
@@ -867,6 +881,10 @@ fun PredictionListItemDark(
 }
 
 
+@OptIn(
+    ExperimentalAnimationApi::class, ExperimentalMaterialApi::class,
+    ExperimentalCoilApi::class
+)
 private fun showDatePicker(
     activity: AppCompatActivity,
     updatedDate: (Long?) -> Unit,
@@ -886,7 +904,6 @@ private fun showDatePicker(
     val jan = calendar.timeInMillis
 
 
-
     val constraintsBuilder =
         CalendarConstraints.Builder().setValidator(DateValidatorPointBackward.now())
 
@@ -898,15 +915,14 @@ private fun showDatePicker(
     }
 
 
-
     val picker = builder.build()
     picker.show(activity.supportFragmentManager, picker.toString())
     picker.addOnPositiveButtonClickListener {
         saveableStateHolder.removeState(NavigationItem.Main.route)
         saveableStateHolder.removeState(NavigationItem.AllGames.route)
         saveableStateHolder.removeState(NavigationItem.Favorites.route)
-        updatedDate(it)
         predictionsViewModel.getLastSelectedDate.value = it
+        updatedDate(it)
     }
 }
 

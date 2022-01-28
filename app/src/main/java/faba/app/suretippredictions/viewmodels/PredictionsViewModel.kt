@@ -69,7 +69,6 @@ class PredictionsViewModel @Inject constructor(
 
                     while (true) {
 
-
                         response.let { data ->
                             data.listPredictions()?.items()?.forEach {
 
@@ -204,7 +203,6 @@ class PredictionsViewModel @Inject constructor(
                     onError(Constants.internetError)
                 } catch (e: ApolloException) {
                     onError(Constants.internetError)
-
                 }
             }
         }

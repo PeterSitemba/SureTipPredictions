@@ -22,7 +22,7 @@ class NetworkConnectionInterceptor(context: Context) : Interceptor {
         }
     }
 
-    private fun isNetworkAvailable(): Boolean {
+     fun isNetworkAvailable(): Boolean {
         var result = false
         val connectivityManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
