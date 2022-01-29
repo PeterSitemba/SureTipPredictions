@@ -1,4 +1,4 @@
-package faba.app.suretippredictions.uicomponents
+package faba.app.suretippredictions.view.uicomponents
 
 import faba.app.suretippredictions.R
 

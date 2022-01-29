@@ -18,6 +18,7 @@ class PredictionsRepository @Inject constructor(
     private val predictionsDao: PredictionsDao
 ) : SafeGuardApiRequest(){
 
+    //region API requests
     suspend fun listPredictions(date: String, nextToken: String): ListPredictionsQuery.Data {
         return apiRequest {
             api.getApolloClient().query(ListPredictionsQuery(date, nextToken)).await()
@@ -35,12 +36,13 @@ class PredictionsRepository @Inject constructor(
             api.getApolloClient().query(GetFixturesQuery(date, nextToken)).await()
         }
     }
+    //End region API requests
 
 
+    //region Room DB functions
     fun roomPredictionsList(date: String) = predictionsDao.getAllPredictionsDistinct(date)
 
     fun getPredictionsRowCount(date: String) = predictionsDao.getRowCountPredTableDistinct(date)
-
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
@@ -59,7 +61,7 @@ class PredictionsRepository @Inject constructor(
     suspend fun updatePredictionOdds(predictionUpdateOdds: Iterable<PredictionUpdateOdds>) {
         predictionsDao.updatePredictionOdds(predictionUpdateOdds)
     }
-
+    // end region Room DB functions
 
 
 }

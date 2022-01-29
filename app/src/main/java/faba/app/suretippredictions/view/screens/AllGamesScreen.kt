@@ -1,4 +1,4 @@
-package faba.app.suretippredictions.screens
+package faba.app.suretippredictions.view.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -8,13 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
-import faba.app.suretippredictions.IsEmpty
-import faba.app.suretippredictions.NoInternetConnection
-import faba.app.suretippredictions.ProgressDialog
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.service.NetworkConnectionInterceptor
-import faba.app.suretippredictions.uicomponents.CollapsableLazyColumn
-import faba.app.suretippredictions.uicomponents.NavigationItem
+import faba.app.suretippredictions.view.uicomponents.*
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 
 @ExperimentalAnimationApi

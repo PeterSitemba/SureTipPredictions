@@ -2,7 +2,7 @@ package faba.app.suretippredictions.service
 
 import android.content.Context
 import com.apollographql.apollo.ApolloClient
-import faba.app.suretippredictions.Constants
+import faba.app.suretippredictions.utils.Constants
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

@@ -1,4 +1,4 @@
-package faba.app.suretippredictions
+package faba.app.suretippredictions.utils
 
 
 object Constants {

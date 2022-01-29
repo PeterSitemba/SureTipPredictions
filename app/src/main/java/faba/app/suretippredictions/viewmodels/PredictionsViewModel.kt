@@ -2,13 +2,12 @@ package faba.app.suretippredictions.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import faba.app.core.ApiException
 import faba.app.core.NoInternetException
-import faba.app.suretippredictions.Constants
+import faba.app.suretippredictions.utils.Constants
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.database.PredictionUpdate
 import faba.app.suretippredictions.database.PredictionUpdateOdds
@@ -118,7 +117,7 @@ class PredictionsViewModel @Inject constructor(
                                     }
                                 }
 
-                                val prediction = Prediction(
+                                val newPrediction = Prediction(
                                     it!!.id(),
                                     it.predictionDate(),
                                     it.gameTime(),
@@ -168,11 +167,9 @@ class PredictionsViewModel @Inject constructor(
 
                                 )
 
-
-                                if (!predictionList.any { prediction -> prediction.id == it.id() }) {
-                                    predictionList.add(prediction)
+                                if (!predictionList.any { existingPrediction -> existingPrediction.id == it.id() }) {
+                                    predictionList.add(newPrediction)
                                 }
-                                //predCounter++
 
                             }
 

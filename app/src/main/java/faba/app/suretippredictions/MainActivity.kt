@@ -7,27 +7,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
-import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.service.NetworkConnectionInterceptor
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
-import faba.app.suretippredictions.uicomponents.SureScorePredictionsMain
-import faba.app.suretippredictions.utils.DateUtil
+import faba.app.suretippredictions.view.uicomponents.MainActivityScreen
 import faba.app.suretippredictions.utils.DateUtil.DateFormater
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
@@ -48,8 +39,8 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
 
         installSplashScreen().apply {
             this.setKeepOnScreenCondition {
-                false
-                //predictionsViewModel.loading.value!!
+                //false
+                predictionsViewModel.loading.value!!
             }
         }
 
@@ -126,35 +117,6 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
 
 }
 
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalMaterialApi
-@Composable
-fun MainActivityScreen(
-    predictionsViewModel: PredictionsViewModel,
-    date: String,
-    updatedDate: (Long?) -> Unit
-) {
-    val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
-        .collectAsState(emptyList())
-
-    val error by predictionsViewModel.errorMessage.observeAsState("")
-
-    val predictionList by remember(predictionItems) {
-        derivedStateOf {
-            predictionItems
-        }
-    }
-
-    SureScorePredictionsMain(
-        predictionList,
-        error,
-        predictionsViewModel,
-        updatedDate
-    )
-
-}
-
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
@@ -163,62 +125,4 @@ fun DefaultPreview() {
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition")
-@Composable
-fun IsEmpty() {
 
-    Box(
-        modifier = Modifier
-            .padding(30.dp)
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ) {
-        Column {
-            Text(text = "Predictions Unavailable")
-        }
-    }
-}
-
-@SuppressLint("CoroutineCreationDuringComposition")
-@Composable
-fun NoInternetConnection() {
-
-    Box(
-        modifier = Modifier
-            .padding(30.dp)
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ) {
-        Column {
-            Text(text = "No Internet Connection")
-        }
-    }
-}
-
-@SuppressLint("CoroutineCreationDuringComposition")
-@Composable
-fun ProgressDialog() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        CircularProgressIndicator(
-            color = colorResource(R.color.colorLightBlue)
-        )
-
-    }
-
-}
-
-@Composable
-fun NoPredictions() {
-    Box(
-        modifier = Modifier
-            .padding(30.dp)
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ) {
-
-
-    }
-}
