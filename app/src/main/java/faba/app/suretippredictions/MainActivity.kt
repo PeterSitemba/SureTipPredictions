@@ -8,9 +8,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import coil.annotation.ExperimentalCoilApi
@@ -18,12 +20,11 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import faba.app.suretippredictions.service.NetworkConnectionInterceptor
 import faba.app.suretippredictions.ui.theme.SureTipPredictionsTheme
-import faba.app.suretippredictions.view.uicomponents.MainActivityScreen
-import faba.app.suretippredictions.utils.DateUtil.DateFormater
+import faba.app.suretippredictions.utils.DateUtil.currentDate
+import faba.app.suretippredictions.utils.DateUtil.dateFormatter
+import faba.app.suretippredictions.view.uicomponents.SureScorePredictionsMain
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 @AndroidEntryPoint
 @ExperimentalAnimationApi
@@ -39,27 +40,20 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
 
         installSplashScreen().apply {
             this.setKeepOnScreenCondition {
-                //false
                 predictionsViewModel.loading.value!!
             }
         }
 
-        val sdf = SimpleDateFormat("yyyy-MM-dd")
-
-        val currentDate = sdf.format(Date())
-        updatePredictions(DateFormater(predictionsViewModel.getLastSelectedDate.value)!!)
-
-        //val currentDate = "2022-01-11"
-
+        updatePredictions(dateFormatter(predictionsViewModel.getLastSelectedDate.value)!!)
 
         setContent {
 
             var datePicked: String by remember {
-                mutableStateOf(currentDate)
+                mutableStateOf(currentDate())
             }
 
             val updatedDate = { date: Long? ->
-                datePicked = DateFormater(date) ?: currentDate
+                datePicked = dateFormatter(date) ?: currentDate()
 
                 if (updatePredictions(datePicked).isActive) {
                     updatePredictions(datePicked).cancel()
@@ -75,19 +69,17 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
             )
 
             SureTipPredictionsTheme(true) {
-                MainActivityScreen(predictionsViewModel, datePicked, updatedDate)
+                SureScorePredictionsMain(predictionsViewModel, updatedDate, datePicked)
 
             }
 
             iniObservables(datePicked)
-
 
         }
     }
 
     private fun iniObservables(date: String) {
 
-        //get pred number from server and use it to update local db if number is less than db
         lifecycleScope.launch {
             predictionsViewModel.getPredictionsRowCount(date)?.collect {
                 predictionsViewModel.localSize.value = it
@@ -116,13 +108,4 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
     }
 
 }
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SureTipPredictionsTheme {
-        //PredictionList("Android")
-    }
-}
-
 

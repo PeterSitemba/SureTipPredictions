@@ -31,20 +31,22 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.service.NetworkConnectionInterceptor
-import faba.app.suretippredictions.utils.DateUtil
-import faba.app.suretippredictions.utils.DateUtil.DateFormaterDayOnly
+import faba.app.suretippredictions.utils.DateUtil.dateFormatter
+import faba.app.suretippredictions.utils.DateUtil.dateFormatterDayOnly
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.launch
 import java.util.*
 
+
+@SuppressLint("CoroutineCreationDuringComposition")
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalMaterialApi
 @Composable
-fun MainActivityScreen(
+fun SureScorePredictionsMain(
     predictionsViewModel: PredictionsViewModel,
-    date: String,
-    updatedDate: (Long?) -> Unit
+    updatedDate: (Long?) -> Unit,
+    date: String
 ) {
 
     val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
@@ -55,26 +57,6 @@ fun MainActivityScreen(
             predictionItems
         }
     }
-
-    SureScorePredictionsMain(
-        predictionList,
-        predictionsViewModel,
-        updatedDate
-    )
-
-}
-
-
-@SuppressLint("CoroutineCreationDuringComposition")
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalMaterialApi
-@Composable
-fun SureScorePredictionsMain(
-    predictionList : List<Prediction>,
-    predictionsViewModel: PredictionsViewModel,
-    updatedDate: (Long?) -> Unit
-) {
 
     var appTitle by remember { mutableStateOf("") }
     var topAppBarIconsName by remember { mutableStateOf("") }
@@ -118,7 +100,7 @@ fun SureScorePredictionsMain(
 
                                     )
                                     Text(
-                                        text = DateFormaterDayOnly(predictionsViewModel.getLastSelectedDate.value)!!,
+                                        text = dateFormatterDayOnly(predictionsViewModel.getLastSelectedDate.value)!!,
                                         fontSize = 11.sp,
                                         modifier = Modifier
                                             .align(
@@ -197,7 +179,7 @@ fun SureScorePredictionsMain(
                     SnackbarResult.ActionPerformed -> {
                         if (NetworkConnectionInterceptor(activity).isNetworkAvailable()) {
                             predictionsViewModel.listPredictions(
-                                DateUtil.DateFormater(
+                                dateFormatter(
                                     predictionsViewModel.getLastSelectedDate.value
                                 )!!
                             )

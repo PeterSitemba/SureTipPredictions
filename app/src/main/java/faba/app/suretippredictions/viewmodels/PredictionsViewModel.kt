@@ -2,7 +2,7 @@ package faba.app.suretippredictions.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo3.exception.ApolloException
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import faba.app.core.ApiException
@@ -81,60 +81,60 @@ class PredictionsViewModel @Inject constructor(
                     while (true) {
 
                         response.let { data ->
-                            data.listPredictions()?.items()?.forEach {
+                            data.data?.listPredictions?.items?.forEach {
 
                                 val predictions = gson.fromJson(
-                                    it.predictions() as String?,
+                                    it?.predictions as String,
                                     Predictions::class.java
                                 )
 
-                                var predictionString = ""
+                                var thePredictionString = ""
 
 
-                                val homeId = it.homeId()
-                                val awayId = it.awayId()
+                                val homeId = it.homeId
+                                val awayId = it.awayId
 
                                 if (predictions.win_or_draw) {
-                                    when (predictions.winner.id) {
+                                    when (predictions?.winner?.id) {
                                         homeId -> {
-                                            predictionString = "Home Win or Draw"
+                                            thePredictionString = "Home Win or Draw"
 
                                         }
                                         awayId -> {
-                                            predictionString = "Away Win or Draw"
+                                            thePredictionString = "Away Win or Draw"
                                         }
                                     }
 
                                 } else {
-                                    when (predictions.winner.id) {
+                                    when (predictions?.winner?.id) {
                                         homeId -> {
-                                            predictionString = "Home Win"
+                                            thePredictionString = "Home Win"
 
                                         }
                                         awayId -> {
-                                            predictionString = "Away Win"
+                                            thePredictionString = "Away Win"
                                         }
                                     }
                                 }
 
                                 val newPrediction = Prediction(
-                                    it!!.id(),
-                                    it.predictionDate(),
-                                    it.gameTime(),
+                                    it.id,
+                                    it.predictionDate,
+                                    it.gameTime,
                                     null,
                                     null,
                                     null,
                                     gson.fromJson(
-                                        it.predictions() as String?,
+                                        it.predictions as String?,
                                         Predictions::class.java
                                     ),
                                     gson.fromJson(
-                                        it.league() as String?,
+                                        it.league as String?,
                                         League::class.java
                                     ),
                                     null,
-                                    it.homeName(),
-                                    it.homeLogo(),
+                                    it.homeName,
+                                    it.homeLogo,
                                     null,
                                     null,
                                     null,
@@ -147,8 +147,8 @@ class PredictionsViewModel @Inject constructor(
                                     null,
                                     null,
                                     null,
-                                    it.awayName(),
-                                    it.awayLogo(),
+                                    it.awayName,
+                                    it.awayLogo,
                                     null,
                                     null,
                                     null,
@@ -163,11 +163,11 @@ class PredictionsViewModel @Inject constructor(
                                     null,
                                     null,
                                     null,
-                                    predictionString
+                                    thePredictionString
 
                                 )
 
-                                if (!predictionList.any { existingPrediction -> existingPrediction.id == it.id() }) {
+                                if (!predictionList.any { existingPrediction -> existingPrediction.id == it.id }) {
                                     predictionList.add(newPrediction)
                                 }
 
@@ -175,12 +175,12 @@ class PredictionsViewModel @Inject constructor(
 
                         }
 
-                        if (response.listPredictions()?.nextToken() == null) {
+                        if (response.data?.listPredictions?.nextToken == null) {
                             break
                         } else {
                             response = repository.listPredictions(
                                 date,
-                                response.listPredictions()?.nextToken()!!,
+                                response.data!!.listPredictions?.nextToken!!,
                             )
 
                         }
@@ -227,27 +227,27 @@ class PredictionsViewModel @Inject constructor(
                     while (true) {
 
                         response.let { data ->
-                            data.listFixtures()?.items()?.forEach {
+                            data.data?.listFixtures?.items?.forEach {
 
                                 //Log.e("The goals are", it.goals().toString())
 
                                 val predictionUpdate = PredictionUpdate(
-                                    it.id(),
+                                    it!!.id,
                                     gson.fromJson(
-                                        it.status() as String?,
+                                        it.status as String?,
                                         Status::class.java
                                     ),
                                     gson.fromJson(
-                                        it.score() as String?,
+                                        it.score as String?,
                                         Score::class.java
                                     ),
                                     gson.fromJson(
-                                        it.goals() as String?,
+                                        it.goals as String?,
                                         Goals::class.java
                                     )
                                 )
 
-                                if (!predictionUpdateList.any { predictionUpdateItem -> predictionUpdateItem.id == it.id() }) {
+                                if (!predictionUpdateList.any { predictionUpdateItem -> predictionUpdateItem.id == it.id }) {
                                     predictionUpdateList.add(predictionUpdate)
                                 }
 
@@ -256,12 +256,12 @@ class PredictionsViewModel @Inject constructor(
 
                         }
 
-                        if (response.listFixtures()?.nextToken() == null) {
+                        if (response.data?.listFixtures?.nextToken == null) {
                             break
                         } else {
                             response = repository.getFixtures(
                                 date,
-                                response.listFixtures()?.nextToken()!!
+                                response.data?.listFixtures?.nextToken!!
                             )
                         }
 
@@ -294,18 +294,18 @@ class PredictionsViewModel @Inject constructor(
                     while (true) {
 
                         response.let { data ->
-                            data.listOdds()?.items()?.forEach {
+                            data.data?.listOdds?.items?.forEach {
 
                                 val predictionUpdateOdds = PredictionUpdateOdds(
-                                    it.id(),
+                                    it!!.id,
                                     gson.fromJson(
-                                        it.bookmaker() as String?,
+                                        it.bookmaker as String?,
                                         Array<Bookmaker>::class.java
                                     ).toMutableList()
 
                                 )
 
-                                if (!predictionUpdateOddsList.any { predictionUpdateOddsItem -> predictionUpdateOddsItem.id == it.id() }) {
+                                if (!predictionUpdateOddsList.any { predictionUpdateOddsItem -> predictionUpdateOddsItem.id == it.id }) {
                                     predictionUpdateOddsList.add(predictionUpdateOdds)
                                 }
 
@@ -314,12 +314,12 @@ class PredictionsViewModel @Inject constructor(
 
                         }
 
-                        if (response.listOdds()?.nextToken() == null) {
+                        if (response.data?.listOdds?.nextToken == null) {
                             break
                         } else {
                             response = repository.listOdds(
                                 date,
-                                response.listOdds()?.nextToken()!!
+                                response.data!!.listOdds?.nextToken!!
                             )
                         }
 

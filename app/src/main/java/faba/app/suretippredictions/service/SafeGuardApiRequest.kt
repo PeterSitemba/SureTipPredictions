@@ -1,13 +1,14 @@
 package faba.app.suretippredictions.service
 
-import com.apollographql.apollo.api.Response
+import com.apollographql.apollo3.api.ApolloResponse
+import com.apollographql.apollo3.api.Operation
 import faba.app.core.ApiException
 import faba.app.core.NoInternetException
 import org.json.JSONException
 
 abstract class SafeGuardApiRequest {
 
-    suspend fun <T : Any> apiRequest(call: suspend () -> Response<T>): T {
+    suspend fun <T : Any> apiRequest(call: suspend () -> ApolloResponse<Operation.Data>): Operation.Data {
         val response = call.invoke()
 
         try {

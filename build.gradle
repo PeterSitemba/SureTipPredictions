@@ -10,15 +10,19 @@ buildscript {
         viewmodel_compose_version = '2.4.0'
         coil_version = '1.3.2'
         accompanist_version = '0.15.0'
-        apollo_version = '2.5.11'
+        apollo_version = '3.0.0'
         ramcosta_navigation = '1.1.6-beta'
     }
     ext.kotlin_version = "1.6.10"
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'https://storage.googleapis.com/r8-releases/raw'
+        }
     }
     dependencies {
+        classpath 'com.android.tools:r8:3.1.34'
         classpath 'com.android.tools.build:gradle:7.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"

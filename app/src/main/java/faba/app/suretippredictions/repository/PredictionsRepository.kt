@@ -1,7 +1,7 @@
 package faba.app.suretippredictions.repository
 
 import androidx.annotation.WorkerThread
-import com.apollographql.apollo.coroutines.await
+import com.apollographql.apollo3.api.ApolloResponse
 import faba.app.suretippredictions.GetFixturesQuery
 import faba.app.suretippredictions.ListOddsQuery
 import faba.app.suretippredictions.ListPredictionsQuery
@@ -16,25 +16,27 @@ import javax.inject.Inject
 class PredictionsRepository @Inject constructor(
     private val api: Apollo,
     private val predictionsDao: PredictionsDao
-) : SafeGuardApiRequest(){
+) : SafeGuardApiRequest() {
 
     //region API requests
-    suspend fun listPredictions(date: String, nextToken: String): ListPredictionsQuery.Data {
-        return apiRequest {
-            api.getApolloClient().query(ListPredictionsQuery(date, nextToken)).await()
-        }
+    suspend fun listPredictions(
+        date: String,
+        nextToken: String
+    ): ApolloResponse<ListPredictionsQuery.Data> {
+
+        return api.getApolloClient().query(ListPredictionsQuery(date, nextToken)).execute()
+
     }
 
-    suspend fun listOdds(date: String, nextToken: String): ListOddsQuery.Data {
-        return apiRequest {
-            api.getApolloClient().query(ListOddsQuery(date, nextToken)).await()
-        }
+    suspend fun listOdds(date: String, nextToken: String): ApolloResponse<ListOddsQuery.Data> {
+        return api.getApolloClient().query(ListOddsQuery(date, nextToken)).execute()
     }
 
-    suspend fun getFixtures(date: String, nextToken: String): GetFixturesQuery.Data {
-        return apiRequest {
-            api.getApolloClient().query(GetFixturesQuery(date, nextToken)).await()
-        }
+    suspend fun getFixtures(
+        date: String,
+        nextToken: String
+    ): ApolloResponse<GetFixturesQuery.Data> {
+        return api.getApolloClient().query(GetFixturesQuery(date, nextToken)).execute()
     }
     //End region API requests
 

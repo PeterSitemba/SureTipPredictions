@@ -6,7 +6,7 @@ import java.util.*
 
 object DateUtil {
     @SuppressLint("SimpleDateFormat")
-    fun DateFormater(milliseconds: Long?): String? {
+    fun dateFormatter(milliseconds: Long?): String? {
         milliseconds?.let {
             val formatter = SimpleDateFormat("yyyy-MM-dd")
             val calendar: Calendar = Calendar.getInstance()
@@ -27,7 +27,7 @@ object DateUtil {
     }
 
     @SuppressLint("SimpleDateFormat")
-    fun DateFormaterDayOnly(milliseconds: Long?): String? {
+    fun dateFormatterDayOnly(milliseconds: Long?): String? {
         milliseconds?.let {
             val formatter = SimpleDateFormat("dd")
             val calendar: Calendar = Calendar.getInstance()
@@ -35,5 +35,11 @@ object DateUtil {
             return formatter.format(calendar.getTime())
         }
         return null
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun currentDate(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd")
+        return sdf.format(Date())
     }
 }
