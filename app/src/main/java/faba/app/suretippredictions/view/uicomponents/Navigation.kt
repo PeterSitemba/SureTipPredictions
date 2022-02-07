@@ -1,6 +1,7 @@
 package faba.app.suretippredictions.view.uicomponents
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.navigation.NavHostController

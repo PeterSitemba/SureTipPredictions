@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +24,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.android.material.datepicker.DateValidatorPointBackward
-import com.google.android.material.datepicker.MaterialDatePicker
 import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.service.NetworkConnectionInterceptor
@@ -35,7 +31,6 @@ import faba.app.suretippredictions.utils.DateUtil.dateFormatter
 import faba.app.suretippredictions.utils.DateUtil.dateFormatterDayOnly
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 import kotlinx.coroutines.launch
-import java.util.*
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -196,7 +191,6 @@ fun SureScorePredictionsMain(
 }
 
 
-
 @ExperimentalMaterialApi
 @Composable
 fun BottomNavigationBar(
@@ -243,52 +237,6 @@ fun BottomNavigationBar(
     }
 }
 
-
-
-@OptIn(
-    ExperimentalAnimationApi::class, ExperimentalMaterialApi::class,
-    ExperimentalCoilApi::class
-)
-private fun showDatePicker(
-    activity: AppCompatActivity,
-    updatedDate: (Long?) -> Unit,
-    predictionsViewModel: PredictionsViewModel,
-    saveableStateHolder: SaveableStateHolder
-) {
-
-    val today = MaterialDatePicker.todayInUtcMilliseconds()
-    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-
-    calendar.timeInMillis = today
-    calendar[Calendar.MONTH] = Calendar.JANUARY - 1
-    val dec = calendar.timeInMillis
-
-    calendar.timeInMillis = today
-    calendar[Calendar.MONTH] = Calendar.JANUARY
-    val jan = calendar.timeInMillis
-
-
-    val constraintsBuilder =
-        CalendarConstraints.Builder().setValidator(DateValidatorPointBackward.now())
-
-    constraintsBuilder.setStart(dec)
-    constraintsBuilder.setEnd(jan)
-    val builder = MaterialDatePicker.Builder.datePicker().apply {
-        setSelection(predictionsViewModel.getLastSelectedDate.value)
-        setCalendarConstraints(constraintsBuilder.build())
-    }
-
-
-    val picker = builder.build()
-    picker.show(activity.supportFragmentManager, picker.toString())
-    picker.addOnPositiveButtonClickListener {
-        saveableStateHolder.removeState(NavigationItem.Main.route)
-        saveableStateHolder.removeState(NavigationItem.AllGames.route)
-        saveableStateHolder.removeState(NavigationItem.Favorites.route)
-        predictionsViewModel.getLastSelectedDate.value = it
-        updatedDate(it)
-    }
-}
 
 @Composable
 fun IsEmpty() {

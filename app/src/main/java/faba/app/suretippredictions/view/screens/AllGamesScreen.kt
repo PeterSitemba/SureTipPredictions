@@ -1,17 +1,32 @@
 package faba.app.suretippredictions.view.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
+import faba.app.suretippredictions.R
 import faba.app.suretippredictions.database.Prediction
 import faba.app.suretippredictions.service.NetworkConnectionInterceptor
 import faba.app.suretippredictions.view.uicomponents.*
 import faba.app.suretippredictions.viewmodels.PredictionsViewModel
+import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
@@ -21,7 +36,7 @@ fun AllGamesScreen(
     onSetAppTitle: (String) -> Unit,
     onTopAppBarIconsName: (String) -> Unit,
     predictionsViewModel: PredictionsViewModel
-) {
+){
 
     onSetAppTitle(NavigationItem.AllGames.name)
     onTopAppBarIconsName(NavigationItem.AllGames.name)
@@ -41,6 +56,8 @@ fun AllGamesScreen(
 
         val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
         val listState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
+
 
         val leagues = groupedLeaguesNo
             .sortedWith(compareBy({ it[0].league?.country }, { it[0].league?.id }))
@@ -52,11 +69,32 @@ fun AllGamesScreen(
                 }
             }
 
-        CollapsableLazyColumn(
-            leagues,
-            listState,
-            collapsedState
-        )
+        Box {
+
+            CollapsableLazyColumn(
+                leagues,
+                listState,
+                collapsedState
+            )
+
+            if (listState.firstVisibleItemIndex > 0) {
+                FloatingActionButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(0)
+                        }
+                    },
+                    backgroundColor = colorResource(R.color.colorLightBlue),
+                    contentColor = colorResource(R.color.white),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 72.dp, end = 12.dp)
+                ) {
+                    Icon(Icons.Filled.KeyboardArrowUp, "")
+                }
+
+            }
+        }
 
 
     }

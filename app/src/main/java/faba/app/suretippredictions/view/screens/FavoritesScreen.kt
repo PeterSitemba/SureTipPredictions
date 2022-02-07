@@ -20,7 +20,7 @@ fun FavoritesScreen(
     prediction: List<Prediction>,
     onSetAppTitle: (String) -> Unit,
     onTopAppBarIconsName: (String) -> Unit,
-    predictionsViewModel: PredictionsViewModel,
+    predictionsViewModel: PredictionsViewModel
 ) {
 
     onSetAppTitle(NavigationItem.Favorites.name)
