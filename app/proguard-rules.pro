@@ -11,6 +11,10 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-dontobfuscate
+-keepattributes SourceFile,LineNumberTable
+
 -keep class faba.app.suretippredictions.database.Prediction** { *; }
 -keep class faba.app.suretippredictions.models.** { *; }
 # Uncomment this to preserve the line number information for

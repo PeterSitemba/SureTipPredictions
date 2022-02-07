@@ -250,10 +250,7 @@ fun PredictionContent(prediction: Prediction, collapsed: Boolean) {
         exit = exitCollapse + exitFadeOut
     ) {
 
-        if (!collapsed) {
-            PredictionListItemDark(prediction, predictionOutcome, odds, theGameTime, gameTextColor)
-
-        }
+        PredictionListItemDark(prediction, predictionOutcome, odds, theGameTime, gameTextColor)
 
     }
 
