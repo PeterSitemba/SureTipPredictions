@@ -1,5 +1,6 @@
 package faba.app.suretippredictions.view.uicomponents
 
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.*
@@ -27,8 +28,11 @@ fun Navigation(
     saveableStateHolder: SaveableStateHolder
 ) {
 
+
     NavHost(navController = navController, startDestination = NavigationItem.Main.route) {
+
         composable(NavigationItem.AllGames.route) {
+
 
             saveableStateHolder.SaveableStateProvider(key = NavigationItem.AllGames.route) {
                 AllGamesScreen(
@@ -49,6 +53,7 @@ fun Navigation(
             }
 
             saveableStateHolder.SaveableStateProvider(key = NavigationItem.Main.route) {
+
                 PredictionsScreen(
                     filteredList,
                     onSetAppTitle,

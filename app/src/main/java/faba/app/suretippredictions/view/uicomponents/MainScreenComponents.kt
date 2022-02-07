@@ -2,6 +2,7 @@ package faba.app.suretippredictions.view.uicomponents
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
@@ -52,6 +53,8 @@ fun SureScorePredictionsMain(
             predictionItems
         }
     }
+
+    //Log.e("SurescoreMain", predictionList.toString())
 
     var appTitle by remember { mutableStateOf("") }
     var topAppBarIconsName by remember { mutableStateOf("") }

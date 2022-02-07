@@ -1,5 +1,6 @@
 package faba.app.suretippredictions.view.uicomponents
 
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -84,7 +85,7 @@ fun CollapsableLazyColumn(
 
 
                     Text(
-                        "${dataItem[0].league?.country} - ${dataItem[0].league?.name!!}",
+                        "${dataItem[0].league?.country!!} - ${dataItem[0].league?.name!!}",
                         Modifier
                             .align(
                                 alignment = Alignment.CenterVertically

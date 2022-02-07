@@ -2,6 +2,7 @@ package faba.app.suretippredictions.view.screens
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,7 +48,6 @@ fun PredictionsScreen(
 
     val loading = predictionsViewModel.loading.observeAsState(true).value
     val apiSize = predictionsViewModel.apiSize.observeAsState(0).value
-
 
     if (prediction.isEmpty() && !NetworkConnectionInterceptor(LocalContext.current).isNetworkAvailable()) {
         NoInternetConnection()
