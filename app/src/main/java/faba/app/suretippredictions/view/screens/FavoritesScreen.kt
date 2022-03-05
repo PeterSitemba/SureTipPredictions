@@ -1,10 +1,11 @@
 package faba.app.suretippredictions.view.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
@@ -17,7 +18,6 @@ import faba.app.suretippredictions.viewmodels.PredictionsViewModel
 @ExperimentalCoilApi
 @Composable
 fun FavoritesScreen(
-    prediction: List<Prediction>,
     onSetAppTitle: (String) -> Unit,
     onTopAppBarIconsName: (String) -> Unit,
     predictionsViewModel: PredictionsViewModel
@@ -26,35 +26,19 @@ fun FavoritesScreen(
     onSetAppTitle(NavigationItem.Favorites.name)
     onTopAppBarIconsName(NavigationItem.Favorites.name)
 
-    val loading = predictionsViewModel.loading.observeAsState(true).value
-    val apiSize = predictionsViewModel.apiSize.observeAsState(0).value
+    val predictionItems: List<Prediction> by predictionsViewModel.roomFavorites()
+        .observeAsState(emptyList())
 
-    if (prediction.isEmpty() && !NetworkConnectionInterceptor(LocalContext.current).isNetworkAvailable()) {
-        NoInternetConnection()
-    } else if (loading || (prediction.isEmpty() && apiSize > 0) || (prediction.isEmpty() && predictionsViewModel.localSize.value!! > 0)) {
-        ProgressDialog()
-    } else if (prediction.isEmpty() && predictionsViewModel.localSize.value == 0) {
-        IsEmpty()
+    if (predictionItems.isEmpty()) {
+        NoFavorites()
     } else {
 
-        val groupedLeaguesNo = prediction.groupBy { it.league?.id }.values
+        val groupedByDates = predictionItems.groupBy{it.date}.values.toList()
         val listState = rememberLazyListState()
-        val leagues = groupedLeaguesNo.toList()
-            .sortedWith(compareBy({ it[0].league?.id }, { it[0].league?.country }))
 
-        val collapsedState =
-            rememberSaveable {
-                leagues.map {
-                    mutableStateOf(true)
-                }
-            }
-
-        CollapsableLazyColumn(
-            leagues,
-            listState,
-            collapsedState
+        CollapsableLazyColumnFavorites(
+            groupedByDates,
+            listState
         )
-
-
     }
 }

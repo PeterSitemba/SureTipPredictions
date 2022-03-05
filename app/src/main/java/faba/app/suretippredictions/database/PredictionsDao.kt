@@ -12,14 +12,19 @@ interface PredictionsDao {
     suspend fun insertPrediction(prediction: Iterable<Prediction>)
 
     @Transaction
-    @Query("SELECT id,date, status, goals, score, predictions,homeName,homeLogo,awayName,awayLogo,odds,league,predictionString,gameTime FROM predictions_table WHERE date = :date")
+    @Query("SELECT id,date, status, goals, score, predictions,homeName,homeLogo,awayName,awayLogo,odds,league,predictionString,gameTime,fav FROM predictions_table WHERE date = :date")
     fun getAllPredictionsByDate(date: String): Flow<List<Prediction>>
 
     fun getAllPredictionsDistinct(date: String) = getAllPredictionsByDate(date).distinctUntilChanged()
 
+    @Transaction
+    @Query("SELECT id,date, status, goals, score, predictions,homeName,homeLogo,awayName,awayLogo,odds,league,predictionString,gameTime,fav,date FROM predictions_table WHERE fav = 1")
+    fun getAllFavorites(): Flow<List<Prediction>>
+
+    fun getAllFavoritesDistinct() = getAllFavorites().distinctUntilChanged()
+
     @Query("DELETE FROM predictions_table")
     suspend fun deleteAllPredictions()
-
 
     //pred count
     @Query("SELECT COUNT(id) FROM predictions_table WHERE date = :date")

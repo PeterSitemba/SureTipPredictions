@@ -19,6 +19,9 @@ import faba.app.suretippredictions.models.predictions.*
 import faba.app.suretippredictions.repository.PredictionsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import java.util.*
 import javax.inject.Inject
 
@@ -57,7 +60,6 @@ class PredictionsViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         onError("Exception handled: ${throwable.localizedMessage}")
-
     }
 
     init {
@@ -163,7 +165,8 @@ class PredictionsViewModel @Inject constructor(
                                     null,
                                     null,
                                     null,
-                                    thePredictionString
+                                    thePredictionString,
+                                    0
 
                                 )
 
@@ -348,14 +351,18 @@ class PredictionsViewModel @Inject constructor(
     }
 
 
-    fun roomPredictionsList(date: String): Flow<List<Prediction>> {
+    fun roomPredictionsList(date: String): LiveData<List<Prediction>> {
         loading.value = false
-        return repository.roomPredictionsList(date)
+        return repository.roomPredictionsList(date).asLiveData()
     }
 
-    fun getPredictionsRowCount(date: String): Flow<Int?>? {
+    fun roomFavorites(): LiveData<List<Prediction>> {
+        return repository.getFavorites().asLiveData()
+    }
+
+    fun getPredictionsRowCount(date: String): LiveData<Int?>? {
         loading.value = true
-        return repository.getPredictionsRowCount(date)
+        return repository.getPredictionsRowCount(date)?.asLiveData()
     }
 
     private fun onError(message: String) {

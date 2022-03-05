@@ -46,7 +46,7 @@ fun SureScorePredictionsMain(
 ) {
 
     val predictionItems: List<Prediction> by predictionsViewModel.roomPredictionsList(date)
-        .collectAsState(emptyList())
+        .observeAsState(emptyList())
 
     val predictionList by remember(predictionItems) {
         derivedStateOf {
@@ -252,6 +252,21 @@ fun IsEmpty() {
     ) {
         Column {
             Text(text = "Predictions Unavailable")
+        }
+    }
+}
+
+@Composable
+fun NoFavorites() {
+
+    Box(
+        modifier = Modifier
+            .padding(30.dp)
+            .fillMaxSize()
+            .wrapContentSize(Alignment.Center)
+    ) {
+        Column {
+            Text(text = "No Favorites")
         }
     }
 }

@@ -63,9 +63,9 @@ fun Navigation(
             }
         }
         composable(NavigationItem.Favorites.route) {
+
             saveableStateHolder.SaveableStateProvider(key = NavigationItem.Favorites.route) {
                 FavoritesScreen(
-                    predictionList,
                     onSetAppTitle,
                     topAppBarIconsName,
                     predictionsViewModel

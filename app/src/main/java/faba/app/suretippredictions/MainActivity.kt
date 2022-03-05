@@ -14,6 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -79,19 +81,14 @@ class MainActivity(private val ioDispatcher: CoroutineDispatcher = Dispatchers.I
     }
 
     private fun iniObservables(date: String) {
-
-        lifecycleScope.launch {
-            predictionsViewModel.getPredictionsRowCount(date)?.collect {
-                predictionsViewModel.localSize.value = it
-                Log.e("Number is", it.toString())
-                if (it == 0) {
-                    predictionsViewModel.listPredictions(date)
-                } else {
-                    predictionsViewModel.apiSize.value = 0
-                }
+        predictionsViewModel.getPredictionsRowCount(date)?.observe(this) { rowCount ->
+            predictionsViewModel.localSize.value = rowCount
+            if (rowCount == 0) {
+                predictionsViewModel.listPredictions(date)
+            } else {
+                predictionsViewModel.apiSize.value = 0
             }
         }
-
     }
 
     private fun updatePredictions(date: String): Job {

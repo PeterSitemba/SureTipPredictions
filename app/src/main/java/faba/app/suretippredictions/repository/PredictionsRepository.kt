@@ -44,6 +44,9 @@ class PredictionsRepository @Inject constructor(
     //region Room DB functions
     fun roomPredictionsList(date: String) = predictionsDao.getAllPredictionsDistinct(date)
 
+    fun getFavorites() = predictionsDao.getAllFavoritesDistinct()
+
+
     fun getPredictionsRowCount(date: String) = predictionsDao.getRowCountPredTableDistinct(date)
 
     @Suppress("RedundantSuspendModifier")

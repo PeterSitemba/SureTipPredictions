@@ -5,6 +5,23 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object DateUtil {
+
+    @SuppressLint("SimpleDateFormat")
+    fun getDay(theDate: String): String {
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        val date = formatter.parse(theDate)
+        return SimpleDateFormat("EEEE").format(date)
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun formatToDateAndMonth(theDate: String): String {
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        val date = formatter.parse(theDate)
+        return SimpleDateFormat("dd-MM").format(date)
+    }
+
+
+
     @SuppressLint("SimpleDateFormat")
     fun dateFormatter(milliseconds: Long?): String? {
         milliseconds?.let {
