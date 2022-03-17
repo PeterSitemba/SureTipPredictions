@@ -36,7 +36,7 @@ fun FavoritesScreen(
         val groupedByDates = predictionItems.groupBy{it.date}.values.toList()
         val listState = rememberLazyListState()
 
-        CollapsableLazyColumnFavorites(
+        FavoritesLazyColumn(
             groupedByDates,
             listState
         )
